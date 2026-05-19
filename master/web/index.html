@@ -423,7 +423,7 @@
 
   // Makes modes buttons 
   function genModes() {
-    let modes = ["LAZY", "FUN", "WAVES"]
+    let modes = ["LAZY", "FUN", "WAVES", "PROPELLER"]
     let html = `<div id="clock-enabled" class="btn ${clockEnabled ? "active" : ""}" style="width: 100px; margin-bottom: 16px;" onclick="toggleClockEnabled()">${clockEnabled ? "ON" : "OFF"}</div>`
     let i = 0
     for (let m of modes)
@@ -1338,6 +1338,32 @@
       }, (7000 + 9000 + 400 *(i*2 + 1)) / scaleFactor)
   }
 
+  // Sets time with propeller animation
+  // Each clock: hour hand spins CW, minute hand spins CCW (CLOCKWISE3 / COUNTERCLOCKWISE3 = 2 extra rotations)
+  function setPropeller(time) {
+    const scaleFactor = Math.pow(speedMultiplier, 0.7)
+    const secs = 14 / scaleFactor
+    for (let hd = 0; hd < 8; hd++) {
+      const di = Math.floor(hd / 2)
+      const half = hd % 2
+      const values = digits[time.charAt(di)].slice(half * 3, half * 3 + 3)
+      for (let x = 0; x < 3; x++) {
+        const curr = current_state[di][x + half * 3]
+        const anim = anim_state[di][x + half * 3]
+        const d2 = calcAngleCCW(curr[0], values[x][0])
+        const d3 = calcAngleCW(curr[1], values[x][1])
+        // h-hand: CLOCKWISE3 (direction 2) — 2 extra full CW rotations
+        curr[0] = (curr[0] - d2) % 360
+        if (curr[0] < 0) curr[0] += 360
+        anim[0] = anim[0] + d2 + 720
+        // m-hand: COUNTERCLOCKWISE3 (direction 5) — 2 extra full CCW rotations
+        curr[1] = (curr[1] + d3) % 360
+        anim[1] = anim[1] - d3 - 720
+        setHands(hd * 3 + x, anim[0], anim[1], secs)
+      }
+    }
+  }
+
   // Last time setted on clock
   let lastTime
   
@@ -1358,6 +1384,9 @@
           break;
         case 2:
           setWaves(lastTime)
+          break;
+        case 3:
+          setPropeller(lastTime)
           break;
       }
     } else if (sleep[day][hours] === 1 || !clockEnabled) {
