@@ -43,6 +43,11 @@ void set_fun();
 void set_waves();
 
 /**
+ * Sets clock time using propeller animation
+*/
+void set_propeller();
+
+/**
  * Sets clock to stop state
 */
 void stop();
@@ -186,6 +191,9 @@ void set_time()
       case WAVES:
         set_waves();
         break;
+      case PROPELLER:
+        set_propeller();
+        break;
     }
   }
 }
@@ -221,6 +229,25 @@ void set_waves()
   {
     set_half_digit(i, clock.digit[i/2].halfs[i%2]);
     delay(200 + (400 - 200) / sqrt(get_speed_multiplier()));
+  }
+}
+
+void set_propeller()
+{
+  set_speed(600 * get_speed_multiplier());
+  set_acceleration(150 * get_speed_multiplier());
+  // Use CLOCKWISE3 to populate speed/accel fields via get_full_half_digit
+  set_direction(CLOCKWISE3);
+  t_full_clock clock = get_clock_state_from_time(last_hour, last_minute);
+  for (int i = 0; i < 8; i++)
+  {
+    t_half_digit hd = get_full_half_digit(clock.digit[i/2].halfs[i%2]);
+    for (int j = 0; j < 3; j++)
+    {
+      hd.clocks[j].mode_h = CLOCKWISE3;
+      hd.clocks[j].mode_m = COUNTERCLOCKWISE3;
+    }
+    send_half_digit(i, hd);
   }
 }
 
