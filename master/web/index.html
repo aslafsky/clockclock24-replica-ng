@@ -1,0 +1,1402 @@
+<html>
+<head>
+  <title>ClockClock 24 (replica-ng)</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 490 490'%3E%3Cstyle xmlns='http://www.w3.org/2000/svg'%3E %23fav %7B stroke: %23000; fill: %23000; %7D @media (prefers-color-scheme: dark) %7B %23fav %7B stroke: %23fff; fill: %23fff; %7D %7D %3C/style%3E%3Cg id='fav'%3E%3Cg%3E%3Cpath d='M233.004,0C104.224,0,0,104.212,0,233.004c0,128.781,104.212,233.004,233.004,233.004 c128.782,0,233.004-104.212,233.004-233.004C466.008,104.222,361.796,0,233.004,0z M244.484,242.659l-63.512,75.511 c-5.333,6.34-14.797,7.156-21.135,1.824c-6.34-5.333-7.157-14.795-1.824-21.135l59.991-71.325V58.028c0-8.284,6.716-15,15-15 s15,6.716,15,15v174.976h0C248.004,236.536,246.757,239.956,244.484,242.659z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E" type="image/svg+xml" />
+  <style>
+
+    html {
+      width: 100%;
+      height: 100%;
+    }
+    
+    body {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      font-family: Tahoma, Helvetica, sans-serif;
+      color: #FFF;
+      background-color: #212121;
+      cursor: default;
+      user-select: none;
+      font-size: 14px;
+    }
+    
+    #art {
+      margin: 80px 0;
+    }
+    
+    .title {
+      font-size: 16px;
+      font-weight: bold;
+      margin-bottom: 8px;
+      text-align: center;
+    }
+    
+    .text {
+      margin-bottom: 8px;
+      text-align: center;
+    }
+
+        .system-stats {
+          color: #b8b8b8;
+          text-align: center;
+          margin-top: 8px;
+          margin-bottom: 16px;
+          line-height: 1.5;
+        }
+    
+    a {
+      color: #8a8a8a;
+      text-decoration: none;
+    }
+    
+    .half-digit {
+      float: left;
+    }
+    
+    .clock {
+      --small-hand: 90deg;
+      --large-hand: 90deg;
+      --animation-time: 15s;
+      width: 8vw;
+      height: 8vw;
+      border-radius: 50%;
+      box-shadow: inset 0 0 3px #fff;
+      float: left;
+      cursor: pointer;
+      position: absolute;
+    }
+    
+    .clock:nth-of-type(n + 1) {
+      clear: left;
+    }
+    
+    .clock-smallHand,
+    .clock-largeHand {
+      transform-origin: 50px center;
+      transition-timing-function: ease;
+      transition: transform var(--animation-time);
+    }
+    
+    .clock-smallHand {
+      transform: rotateZ(var(--small-hand));
+    }
+    
+    .clock-largeHand {
+      transform: rotateZ(var(--large-hand));
+    }
+    
+    .hidden .btn-clock {
+      display: none;
+    }
+    
+    #external.hidden {
+      display: none;
+    }
+    
+    .btn-clock {
+      position: absolute;
+      width: 4vw;
+      height: 4vw;
+      background-color: #212121dc;
+      box-shadow: inset 0 0 3px #fff;
+      font-size: 0.8vw;
+      font-weight: bold;
+      display: flex;
+      flex-direction: row;
+      align-content: center;
+      justify-content: center;
+      align-items: center;
+      cursor: pointer;
+    }
+    
+    .btn-clock:hover {
+      background-color: #c60a0a;
+    }
+    
+    .btn-clock.btn-clock-tl {
+      border-radius: 4vw 0 0 0;
+    }
+    
+    .btn-clock.btn-clock-tr {
+      margin-left: 4vw;
+      border-radius: 0 4vw 0 0;
+    }
+    
+    .btn-clock.btn-clock-bl {
+      margin-top: 4vw;
+      border-radius: 0 0 0 4vw;
+    }
+    
+    .btn-clock.btn-clock-br {
+      margin-left: 4vw;
+      margin-top: 4vw;
+      border-radius: 0 0 4vw 0;
+    }
+    
+    .clock-box {
+      width: 8vw;
+      height: 8vw;
+      margin: 0.2vw;
+    }
+    
+    .btn {
+      width: 72px;
+      height: 48px;
+      margin: 4px;
+      margin-bottom: 8px;
+      font-size: 14px;
+      border-width: 0;
+      padding: 0;
+      background-color: transparent;
+      color: #fff;
+      box-shadow: inset 0 0 2px #dfdfdf;
+      cursor: pointer;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      float: left;
+    }
+    
+    .btn:hover {
+      background-color: #b4b4b44b;
+    }
+    
+    .btn.active {
+      background-color: #dfdfdf;
+      box-shadow: inset 0 0 0 2px #dfdfdf;
+      color: black;
+    }
+    
+    .btn.day-active {
+      background-color: #dfdfdf;
+      box-shadow: inset 0 0 0 2px #dfdfdf;
+      color: black;
+      padding-bottom: 8px;
+      margin-bottom: 0;
+    }
+    
+    .checkbox {
+      width: 44px;
+      height: 16px;
+      box-shadow: inset 0 0 1px black;
+      float: left;
+      margin: 2px;
+      margin-bottom: 8px;
+    }
+    
+    .checkbox:hover {
+      background-color: #b4b4b4;
+    }
+    
+    .checkbox.selected {
+      background-color: black;
+    }
+    
+    .hour-text {
+      width: 48px;
+      height: 16px;
+      color: #212121dc;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      float: left;
+      font-size: 12px;
+      margin-top: 4px;
+    }
+    
+    .spacer {
+      height: 24px;
+    }
+    
+    .input-text {
+      width: 172px;
+      height: 48px;
+      margin: 4px;
+      box-shadow: inset 0 0 2px #dfdfdf;
+      background-color: transparent;
+      border-color: transparent;
+      color: white;
+      padding-top: 0;
+      padding-bottom: 0;
+      padding-left: 16px;
+      padding-right: 16px;
+      font-size: 16px;
+      float: left;
+      display: inline;
+      white-space: nowrap;
+      border-width: 0;
+    }
+    
+    .input-text:focus-visible {
+        outline: transparent;
+    }
+    
+    .input-text::selection {
+      color: black;
+      background: white;
+    }
+    
+    select.input-text {
+      background-color: #212121;
+      color: white;
+      padding: 0 8px;
+      cursor: pointer;
+    }
+    
+    select.input-text option {
+      background-color: #212121;
+      color: white;
+    }
+    
+    .hours-box {
+      background-color: #dfdfdf;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 16px;
+    }
+  </style>
+</head>
+<body id="body">
+<div class="spacer"></div>
+<h1>ClockClock 24 (replica-ng)</h1>
+<div id="art"></div>
+<div class="spacer"></div>
+<div class="title">
+  Mode
+</div>
+<div id="modes"></div>
+<div class="spacer"></div>
+<div class="title">
+  Speed Multiplier
+</div>
+<div>
+  <input type="number" id="multiplier" style="width:100px" class="input-text" min="1"/>
+  <button class="btn" style="width:100px" onclick="saveClockSettings()">SAVE</button>
+</div>
+<div class="spacer"></div>
+<div class="title">
+  Sleep Time
+</div>
+<div id="days"></div>
+<div id="hours"></div>
+<div class="spacer"></div>
+<div class="title">
+  Wireless Connection
+</div>
+<div id="wifi">
+  <div class="btn" style="width:150px" id="con-0" onclick="selectConnection(0)">HOTSPOT</div>
+  <div class="btn" style="width:150px" id="con-1" onclick="selectConnection(1)">EXTERNAL</div>
+</div>
+<form id="external" class="hidden" onsubmit="return false;">
+  <input type="text" id="hostname" class="input-text" placeholder="HOSTNAME"/>
+  <input type="text" id="ssid" class="input-text" placeholder="SSID" minlength="1" required/>
+  <input type="password" id="password" class="input-text" placeholder="PASSWORD" minlength="1" required/>
+  <button type="submit" class="btn" style="width:100px" onclick="saveConnection()">SAVE</button>
+</form>
+<div class="spacer"></div>
+<div class="title">
+  MQTT Configuration
+</div>
+<form id="mqtt-form" onsubmit="return false;">
+  <div style="display: flex; align-items: center; margin: 4px;">
+    <input type="checkbox" id="mqtt-enabled" style="width: 20px; height: 20px; margin: 0 8px 0 0; cursor: pointer;"/>
+    <label for="mqtt-enabled" style="cursor: pointer;">Enable MQTT</label>
+  </div>
+  <input type="text" id="mqtt-broker" class="input-text" placeholder="BROKER ADDRESS"/>
+  <input type="number" id="mqtt-port" class="input-text" placeholder="PORT" value="1883" min="1" max="65535"/>
+  <input type="text" id="mqtt-username" class="input-text" placeholder="USERNAME (optional)"/>
+  <input type="password" id="mqtt-password" class="input-text" placeholder="PASSWORD (optional)"/>
+  <button type="submit" class="btn" style="width:100px" onclick="saveMqttConfig()">SAVE</button>
+</form>
+<div class="spacer"></div>
+<div class="title">
+  Firmware Update
+</div>
+<div style="margin-bottom: 8px;">
+  <p>Board: <span id="board-name">Loading...</span></p>
+</div>
+<div style="margin-bottom: 12px; display: flex; justify-content: center;">
+  <form id="upload-form" onsubmit="return false;" enctype="multipart/form-data" style="margin: 0;">
+    <input type="file" id="firmware-file" accept=".bin" style="display: none;" onchange="uploadFirmware()"/>
+    <button type="button" class="btn" style="width:150px" onclick="document.getElementById('firmware-file').click()">UPLOAD FILE</button>
+  </form>
+  <button type="button" class="btn" style="width:150px" onclick="fetchFirmwareFromGithub()">UPDATE FROM GITHUB</button>
+</div>
+<div style="margin-bottom: 12px;">
+  <p id="update-status" style="margin: 0; color: #888;"></p>
+</div>
+<div class="spacer"></div>
+<div class="title">
+  Daily Restart
+</div>
+<div style="margin: 12px; text-align: center;">
+  <div style="margin-bottom: 8px;">
+    <input type="checkbox" id="daily-restart-enabled" style="width: 20px; height: 20px; margin: 0 8px 0 0; cursor: pointer;"/>
+    <label for="daily-restart-enabled" style="cursor: pointer;">Enable automatic daily restart at</label>
+  </div>
+  <div style="display: flex; justify-content: center; align-items: center; gap: 8px;">
+    <select id="daily-restart-hour" class="input-text" style="width: 80px;">
+      <option value="0">00:00</option>
+      <option value="1">01:00</option>
+      <option value="2">02:00</option>
+      <option value="3">03:00</option>
+      <option value="4">04:00</option>
+      <option value="5">05:00</option>
+      <option value="6">06:00</option>
+      <option value="7">07:00</option>
+      <option value="8">08:00</option>
+      <option value="9">09:00</option>
+      <option value="10">10:00</option>
+      <option value="11">11:00</option>
+      <option value="12">12:00</option>
+      <option value="13">13:00</option>
+      <option value="14">14:00</option>
+      <option value="15">15:00</option>
+      <option value="16">16:00</option>
+      <option value="17">17:00</option>
+      <option value="18">18:00</option>
+      <option value="19">19:00</option>
+      <option value="20">20:00</option>
+      <option value="21">21:00</option>
+      <option value="22">22:00</option>
+      <option value="23">23:00</option>
+    </select>
+    <button type="button" class="btn" style="width:100px" onclick="saveDailyRestart()">SAVE</button>
+    <button type="button" class="btn" style="width:150px" onclick="restartDevice()">RESTART NOW</button>
+  </div>
+</div>
+<div class="spacer"></div>
+<div id="system-stats" class="system-stats">
+  <small>Free Heap: <span id="stat-free-heap">--</span></small><br/>
+  <small>Uptime: <span id="stat-uptime">--</span></small>
+</div>
+<div class="spacer"></div>
+<div class="text"> 
+  <p><small>Code</small><br/><a href="https://github.com/vallasc">Giacomo Vallorani</a><br/><a href="https://github.com/whosmatt">whosmatt</a></p>
+  <p><small>Clock animation</small><br/><a href="https://manu.ninja/">Manuel Wieser</a></p>
+  <p><small>Design</small><br/><a href="http://www.humanssince1982.com/">Humans since 1982</a></p>
+</div>
+<script>
+  // Hours when the clock remains off
+  let sleep = [Array(24).fill(0), 
+              Array(24).fill(0), 
+              Array(24).fill(0), 
+              Array(24).fill(0), 
+              Array(24).fill(0), 
+              Array(24).fill(0), 
+              Array(24).fill(0)]
+
+  // Current selected animation mode
+  let selectedMode = 0
+  // Current clock enabled state
+  let clockEnabled = true
+  // Current selected mode
+  let selectedClock = undefined
+  // Current selected day
+  let selectedDay = undefined
+  // Current selected connection mode
+  let selectedConnection = undefined
+  // Clock settings multiplier
+  let speedMultiplier = 1
+  // Wifi credentials
+  let ssid = ""
+  let password = ""
+  let hostname = ""
+  // MQTT configuration
+  let mqttEnabled = false
+  let mqttBroker = ""
+  let mqttPort = 1883
+  let mqttUsername = ""
+  let mqttPassword = ""
+
+  /* DOM making */
+
+  // Returns a single clock HTML element
+  function clock(index) {
+    return `<div id="clock-${index}" class="clock-box hidden"><svg class="clock clock--${index}" width="100" height="100" viewBox="0 0 100 100" onclick="selectClock(${index})"><path class="clock-smallHand" d="M50,47 C48.3431458,47 47,48.3431458 47,50 C47,51.6568542 48.3431458,53 50,53 L95,53 L95,47 L50,47 Z" stroke="none" fill="#FFF" fill-rule="evenodd"></path><path class="clock-largeHand" d="M50,47 C48.3431458,47 47,48.3431458 47,50 C47,51.6568542 48.3431458,53 50,53 L100,53 L100,47 L50,47 Z" stroke="none" fill="#FFF" fill-rule="evenodd"></path></svg><div class="btn-clock btn-clock-tl" onclick="adjustHand(${index}, 0, 1)">H-</div><div class="btn-clock btn-clock-tr" onclick="adjustHand(${index}, 1, 0)">M-</div><div class="btn-clock btn-clock-bl" onclick="adjustHand(${index}, 0, -1)">H+</div><div class="btn-clock btn-clock-br" onclick="adjustHand(${index}, -1, 0)">M+</div></div>`
+  }
+
+  // Makes modes buttons 
+  function genModes() {
+    let modes = ["LAZY", "FUN", "WAVES"]
+    let html = `<div id="clock-enabled" class="btn ${clockEnabled ? "active" : ""}" style="width: 100px; margin-bottom: 16px;" onclick="toggleClockEnabled()">${clockEnabled ? "ON" : "OFF"}</div>`
+    let i = 0
+    for (let m of modes)
+      html += `<div id="mode-${i}" class="btn ${i === selectedMode ? "active" : ""}" onclick="selectMode(${i++})">${m}</div>`
+    document.getElementById("modes").innerHTML = html
+  }
+
+  // Makes the full clock
+  function genClocks() {
+    let html = `<div class="half-digit">`
+    for (let i = 0; i <24; i++) {
+      if(i % 3 == 0 && i != 0) {
+        html += "</div>"
+        html += `<div class="half-digit">`
+      }
+      html += clock(i)
+    }
+    html += "</div>"
+    document.getElementById("art").innerHTML = html
+  }
+
+  // Makes days buttons
+  function genDays() {
+    let days = ["MON", "TUE", "WED", "THU", "FRI", "SAT", "SUN"]
+    let html = ""
+    let i = 0
+    for (let day of days)
+      html += `<div id="day-${i}" class="btn" onclick="selectDay(${i++})">${day}</div>`
+    document.getElementById("days").innerHTML = html
+  }
+
+  // Makes hours card
+  function genHours(day) {
+    let html = `<div class="hours-box"><div>`
+    for (let i = 0; i <=12; i++)
+      html += `<div class="hour-text">${i}</div>`
+    html += `</div><div>`
+    for (let i = 0; i <12; i++)
+      html += `<div id="hour-${i}" class="checkbox ${sleep[day][i] === 1 ? "selected" : ""}" onclick="selectHour(${i})"></div>`
+    html += "</div><div>"
+    for (let i = 12; i <=24; i++)
+      html += `<div class="hour-text">${i%24}</div>`
+    html += `</div><div>`
+    for (let i = 12; i <24; i++)
+      html += `<div id="hour-${i}" class="checkbox ${sleep[day][i] === 1 ? "selected" : ""}" onclick="selectHour(${i})"></div>`
+    html += "</div></div>"
+    document.getElementById("hours").innerHTML = html
+  }
+
+  // Called on buttons clicks to select the mode
+  function selectMode(mode) {
+    if(selectedMode !== undefined)
+      document.getElementById("mode-" + selectedMode).classList.remove("active")
+    selectedMode = mode
+    document.getElementById("mode-" + selectedMode).classList.add("active")
+    saveMode(selectedMode, clockEnabled)
+  }
+
+  // Called when power checkbox is toggled
+  function toggleClockEnabled() {
+    clockEnabled = !clockEnabled
+    const btn = document.getElementById("clock-enabled")
+    btn.textContent = clockEnabled ? "ON" : "OFF"
+    clockEnabled ? btn.classList.add("active") : btn.classList.remove("active")
+    clockEnabled ? startClock() : stopClock()
+    saveMode(selectedMode, clockEnabled)
+  }
+
+  // Called on buttons clicks to select the day
+  function selectDay(day) {
+    deselectDay()
+    if(selectedDay !== day) {
+      selectedDay = day
+      document.getElementById("day-" + selectedDay).classList.add("day-active")
+      genHours(day)
+    }
+  }
+
+  // Remove selection on the last day button
+  function deselectDay() {
+    if(selectedDay !== undefined)
+      document.getElementById("day-" + selectedDay).classList.remove("day-active")
+    selectedDay = undefined
+    document.getElementById("hours").innerHTML = ""
+  }
+
+  // Select the hour and update the sleep array
+  function selectHour(index) {
+    let state = sleep[parseInt(selectedDay)][index]
+    sleep[parseInt(selectedDay)][index] = state === 1 ? 0 : 1
+    if(state === 0)
+      document.getElementById("hour-" + index).classList.add("selected")
+    else
+      document.getElementById("hour-" + index).classList.remove("selected")
+    saveSleepTime(selectedDay, sleep[parseInt(selectedDay)])
+  }
+
+  // Remove selection on the last selected clock
+  function deselectClock() {
+    if(selectedClock !== undefined)
+      document.getElementById("clock-" + selectedClock).classList.add("hidden")
+      selectedClock = undefined
+  }
+
+  // Select a clock showing buttons on top of it
+  function selectClock(index) {
+    deselectClock()
+    selectedClock = index
+    document.getElementById("clock-" + selectedClock).classList.remove("hidden")
+  }
+
+  // Called on buttons click to change connection type
+  function selectConnection(mode) {
+    // Remove last selection
+    if(selectedConnection !== undefined){
+      document.getElementById("con-" + selectedConnection).classList.remove("active")
+      document.getElementById("external").classList.add("hidden")
+    }
+    // Hotspot mode, update directly
+    if(mode === 0 && selectedConnection !== mode && selectedConnection !== undefined) {
+      selectedConnection = mode
+      saveConnection()
+    } else {
+      selectedConnection = mode
+    }
+    if(mode === 1) // Show SSID and password fields
+      document.getElementById("external").classList.remove("hidden")
+    document.getElementById("con-" + selectedConnection).classList.add("active")
+  }
+
+  // Deselect all buttons on focus change
+  document.addEventListener("click", function(e) {
+    if (e.target.id === "body") {
+      deselectClock()
+      deselectDay()
+    }
+  })
+
+  // Makes all the HTML elements
+  genClocks()
+  genModes()
+  genDays()
+
+  /* Server calls */
+
+  // Send current datetime to clock
+  function sendDate() {
+    const d = new Date()
+    let formData = new FormData()
+    formData.append("h", d.getHours().toString())
+    formData.append("m", d.getMinutes().toString())
+    formData.append("s", d.getSeconds().toString())
+    formData.append("D", d.getDate().toString())
+    formData.append("M", (d.getMonth()+1).toString())
+    formData.append("Y", d.getFullYear().toString())
+    formData.append("timezone", (d.getTimezoneOffset() / -60).toString())
+    fetch("/time", {
+      method: "post",
+      body: formData,
+    })
+  }
+
+  // Gets clock configuration from the server
+  async function updateConfig() {
+    let response = await fetch("/config", {
+      method: "get",
+    })
+    let res = await response.json()
+    sleep = res.sleep_time
+    if(selectedDay !== undefined)
+      genHours(selectedDay)
+    // Update clock mode and enabled state
+    selectedMode = res.clock_mode
+    clockEnabled = res.clock_enabled !== undefined ? res.clock_enabled : true
+    genModes()
+    if (!clockEnabled) {
+      stopClock()
+    }
+    selectConnection(res.wireless_mode)
+    speedMultiplier = res.speed_multiplier || 1
+    document.getElementById("multiplier").value = speedMultiplier
+    document.getElementById("ssid").value = ssid = res.ssid
+    document.getElementById("password").value = password = res.password
+    document.getElementById("hostname").value = hostname = res.hostname
+    // Update MQTT configuration
+    mqttEnabled = res.mqtt_enabled || false
+    mqttBroker = res.mqtt_broker || ""
+    mqttPort = res.mqtt_port || 1883
+    mqttUsername = res.mqtt_username || ""
+    document.getElementById("mqtt-enabled").checked = mqttEnabled
+    document.getElementById("mqtt-broker").value = mqttBroker
+    document.getElementById("mqtt-port").value = mqttPort
+    document.getElementById("mqtt-username").value = mqttUsername
+  }
+
+  // Sends an adjust hand request
+  function adjustHand(index, m_amount, h_amount) {
+    let f = new FormData()
+    f.append("index", index.toString())
+    f.append("m_amount", m_amount.toString())
+    f.append("h_amount", h_amount.toString())
+    fetch("/adjust", {
+      method: "post",
+      body: f,
+    })
+  }
+
+  // Sends a request to save the clock mode
+  function saveMode(mode, enabled) {
+    let f = new FormData()
+    f.append("mode", mode.toString())
+    f.append("enabled", enabled ? "1" : "0")
+    fetch("/mode", {
+      method: "post",
+      body: f,
+    })
+  }
+
+  // Sends a request to save the clock settings
+  function saveClockSettings() {
+    speedMultiplier = parseInt(document.getElementById("multiplier").value)
+    let f = new FormData()
+    f.append("multiplier", speedMultiplier.toString())
+    fetch("/settings", {
+      method: "post",
+      body: f,
+    })
+  }
+
+  // Last modified sleep day
+  // Used to delay and aggregate request in order not to
+  // overload the system
+  let lastSleepDay = undefined
+  let sleepTimeout = undefined
+
+  // Sends a request to save the sleep time array
+  function saveSleepTime(day, hours) {
+    // If there is already a timeout clears it
+    if(lastSleepDay === day)
+      clearTimeout(sleepTimeout);
+    lastSleepDay = day
+    // Delayed request
+    sleepTimeout = setTimeout(()=>{
+      let f = new FormData()
+      f.append("day", day.toString())
+      for (let i = 0; i < 24; i++)
+        f.append("h" + i, hours[i].toString())
+      fetch("/sleep", {
+        method: "post",
+        body: f
+      })
+    }, 1500)
+  }
+
+  // Sends a request to save the connection type
+  async function saveConnection() {
+    ssid = document.getElementById("ssid").value;
+    password = document.getElementById("password").value;
+    hostname = document.getElementById("hostname").value;
+    let f = new FormData()
+    f.append("mode", selectedConnection.toString())
+    f.append("ssid", ssid)
+    f.append("password", password)
+    f.append("hostname", hostname)
+    await fetch("/connection", {
+      method: "post",
+      body: f,
+    })
+    setTimeout(() => location.reload(), 2000)
+  }
+
+  // Sends a request to save MQTT configuration
+  async function saveMqttConfig() {
+    mqttEnabled = document.getElementById("mqtt-enabled").checked
+    mqttBroker = document.getElementById("mqtt-broker").value
+    mqttPort = parseInt(document.getElementById("mqtt-port").value)
+    mqttUsername = document.getElementById("mqtt-username").value
+    mqttPassword = document.getElementById("mqtt-password").value
+    let f = new FormData()
+    f.append("enabled", mqttEnabled ? "1" : "0")
+    f.append("broker", mqttBroker)
+    f.append("port", mqttPort.toString())
+    f.append("username", mqttUsername)
+    f.append("password", mqttPassword)
+    await fetch("/mqtt", {
+      method: "post",
+      body: f,
+    })
+    alert("MQTT configuration saved")
+  }
+
+  // Update status tracking
+  let updateInProgress = false
+  
+  // Update status text display
+  function updateStatusDisplay(status) {
+    const statusElement = document.getElementById("update-status")
+    if (!statusElement) return;
+    
+    let message = "";
+    let color = "#888";
+    
+    switch(status.status) {
+      case "idle":
+        message = "";
+        break;
+      case "starting":
+        message = "Initializing update...";
+        color = "#1a7f1a";
+        break;
+      case "uploading":
+      case "fetching":
+        const percent = status.progress || 0;
+        const current = (status.current / 1024).toFixed(1);
+        const total = (status.total / 1024).toFixed(1);
+        if (status.status === "fetching" && percent === 0) {
+          message = "Downloading from GitHub...";
+        } else {
+          message = `${status.status === "fetching" ? "Downloading" : "Uploading"}: ${percent}% (${current}KB / ${total}KB)`;
+        }
+        color = "#1a7f1a";
+        break;
+      case "finishing":
+        message = "Finishing update...";
+        color = "#1a7f1a";
+        break;
+      case "success":
+        message = "Update successful! Device will restart...";
+        color = "#1a7f1a";
+        break;
+      case "error":
+        message = `Error: ${status.error}`;
+        color = "#d32f2f";
+        break;
+      case "cancelled":
+        message = "Update cancelled";
+        color = "#888";
+        break;
+    }
+    
+    statusElement.textContent = message;
+    statusElement.style.color = color;
+  }
+  
+  // Poll update status
+  let statusPollInterval
+  function startStatusPolling() {
+    if (statusPollInterval) clearInterval(statusPollInterval);
+    statusPollInterval = setInterval(async () => {
+      try {
+        const response = await fetch("/api/update/status");
+        if (!response.ok) return;
+        const status = await response.json();
+        updateStatusDisplay(status);
+        
+        if (!status.in_progress && status.status !== "idle") {
+          clearInterval(statusPollInterval);
+          updateInProgress = false;
+          
+          // Auto-refresh on success
+          if (status.status === "success") {
+            setTimeout(() => location.reload(), 3000);
+          }
+        }
+      } catch (e) {
+        console.error("Failed to get update status:", e);
+      }
+    }, 500);
+  }
+  
+  // Upload firmware from file input
+  async function uploadFirmware() {
+    const fileInput = document.getElementById("firmware-file");
+    if (!fileInput || !fileInput.files || fileInput.files.length === 0) {
+      alert("Please select a firmware file");
+      return;
+    }
+    
+    if (updateInProgress) {
+      alert("Update already in progress");
+      return;
+    }
+    
+    const file = fileInput.files[0];
+    
+    // Sanity check file size, actual limit is lower
+    const maxSize = 4 * 1024 * 1024;
+    if (file.size > maxSize) {
+      alert(`File too large. Maximum size is ${maxSize / 1024 / 1024}MB`);
+      return;
+    }
+    
+    if (!confirm(`Upload ${file.name} (${(file.size / 1024).toFixed(1)}KB)?`)) {
+      return;
+    }
+    
+    updateInProgress = true;
+    const formData = new FormData();
+    formData.append("file", file);
+    
+    // Use XMLHttpRequest for upload progress tracking
+    const xhr = new XMLHttpRequest();
+    
+    xhr.upload.addEventListener("progress", (e) => {
+      if (e.lengthComputable) {
+        const percent = Math.round((e.loaded / e.total) * 100);
+        updateStatusDisplay({
+          status: "uploading",
+          error: "",
+          progress: percent,
+          current: e.loaded,
+          total: e.total,
+          in_progress: true
+        });
+      }
+    });
+    
+    xhr.addEventListener("load", () => {
+      fileInput.value = "";  // Clear file input to allow re-selection
+      if (xhr.status === 200) {
+        startStatusPolling();
+      } else {
+        try {
+          const result = JSON.parse(xhr.responseText);
+          updateStatusDisplay({
+            status: "error",
+            error: result.message || "Upload failed",
+            progress: 0,
+            current: 0,
+            total: 0,
+            in_progress: false
+          });
+        } catch (e) {
+          updateStatusDisplay({
+            status: "error",
+            error: "Upload failed",
+            progress: 0,
+            current: 0,
+            total: 0,
+            in_progress: false
+          });
+        }
+        updateInProgress = false;
+      }
+    });
+    
+    xhr.addEventListener("error", () => {
+      fileInput.value = "";  // Clear file input to allow re-selection
+      updateStatusDisplay({
+        status: "error",
+        error: "Upload failed",
+        progress: 0,
+        current: 0,
+        total: 0,
+        in_progress: false
+      });
+      updateInProgress = false;
+    });
+    
+    xhr.open("POST", "/api/update/upload");
+    xhr.send(formData);
+  }
+  
+  // Board target
+  let boardTarget = "unknown";
+  
+  // Load board target from server
+  async function loadBoardInfo() {
+    try {
+      const response = await fetch("/api/update/target");
+      if (!response.ok) return;
+      boardTarget = await response.text();
+      const boardNameElement = document.getElementById("board-name");
+      if (boardNameElement) {
+        boardNameElement.textContent = boardTarget;
+      }
+    } catch (e) {
+      console.error("Failed to load board target:", e);
+    }
+  }
+
+  function formatUptime(totalSeconds) {
+    const days = Math.floor(totalSeconds / 86400)
+    const hours = Math.floor((totalSeconds % 86400) / 3600)
+    const minutes = Math.floor((totalSeconds % 3600) / 60)
+    const seconds = totalSeconds % 60
+
+    if (days > 0)
+      return `${days}d ${hours}h ${minutes}m ${seconds}s`
+    if (hours > 0)
+      return `${hours}h ${minutes}m ${seconds}s`
+    if (minutes > 0)
+      return `${minutes}m ${seconds}s`
+    return `${seconds}s`
+  }
+
+  async function loadSystemStats() {
+    try {
+      const response = await fetch("/system")
+      if (!response.ok)
+        return
+
+      const stats = await response.json()
+      const freeHeap = document.getElementById("stat-free-heap")
+      const uptime = document.getElementById("stat-uptime")
+      if (!freeHeap || !uptime)
+        return
+
+      const freeHeapKb = Math.round((stats.free_heap || 0) / 1024)
+      freeHeap.textContent = `${freeHeapKb} KB`
+      uptime.textContent = formatUptime(stats.uptime || 0)
+    } catch (e) {
+      console.error("Failed to load system stats:", e)
+    }
+  }
+
+  async function loadDailyRestart() {
+    try {
+      const response = await fetch("/daily-restart")
+      if (!response.ok)
+        return
+
+      const config = await response.json()
+      const enabledCheckbox = document.getElementById("daily-restart-enabled")
+      const hourSelect = document.getElementById("daily-restart-hour")
+      if (enabledCheckbox && hourSelect) {
+        enabledCheckbox.checked = config.enabled
+        hourSelect.value = config.hour
+      }
+    } catch (e) {
+      console.error("Failed to load daily restart config:", e)
+    }
+  }
+
+  async function saveDailyRestart() {
+    const enabledCheckbox = document.getElementById("daily-restart-enabled")
+    const hourSelect = document.getElementById("daily-restart-hour")
+    if (!enabledCheckbox || !hourSelect) return
+
+    const formData = new FormData()
+    formData.append("enabled", enabledCheckbox.checked ? "1" : "0")
+    formData.append("hour", hourSelect.value)
+
+    try {
+      const response = await fetch("/daily-restart", {
+        method: "POST",
+        body: formData
+      })
+
+      if (!response.ok) {
+        alert("Failed to save daily restart config")
+        return
+      }
+
+      alert("Daily restart configuration saved")
+    } catch (e) {
+      console.error("Save daily restart error:", e)
+      alert("Failed to save daily restart config")
+    }
+  }
+  
+  // Github release firmware fetcher
+  async function fetchFirmwareFromGithub() {
+    if (updateInProgress) {
+      alert("Update already in progress");
+      return;
+    }
+    
+    // Construct GitHub URL
+    const owner = "aslafsky";
+    const repo = "clockclock24-replica-ng";
+    const tag = "latest"; // Perhaps make this an input in the future
+    const filename = boardTarget + ".bin";
+    const url = `https://github.com/${owner}/${repo}/releases/download/${tag}/${filename}`;
+    
+    if (!confirm(`Update from GitHub?\n\nThis will download and install the latest firmware.`)) {
+      return;
+    }
+    
+    updateInProgress = true;
+    updateStatusDisplay({
+      status: "fetching",
+      error: "",
+      progress: 0,
+      current: 0,
+      total: 0,
+      in_progress: true
+    });
+    
+    try {
+      const response = await fetch("/api/update/fetch", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          url: url
+        })
+      });
+      
+      const result = await response.json();
+      if (!response.ok) {
+        updateStatusDisplay({
+          status: "error",
+          error: result.message || "Fetch failed",
+          progress: 0,
+          current: 0,
+          total: 0,
+          in_progress: false
+        });
+        updateInProgress = false;
+      } else {
+        startStatusPolling();
+      }
+    } catch (e) {
+      console.error("Fetch error:", e);
+      updateStatusDisplay({
+        status: "error",
+        error: e.message || "Fetch failed",
+        progress: 0,
+        current: 0,
+        total: 0,
+        in_progress: false
+      });
+      updateInProgress = false;
+    }
+  }
+
+  async function restartDevice() {
+    if (updateInProgress) {
+      alert("Update in progress")
+      return
+    }
+
+    if (!confirm("Restart device now?")) {
+      return
+    }
+
+    try {
+      const response = await fetch("/restart", {
+        method: "POST"
+      })
+
+      if (!response.ok) {
+        let message = "Failed to schedule restart"
+        try {
+          const result = await response.json()
+          if (result && result.message)
+            message = result.message
+        } catch (e) {}
+        alert(message)
+        return
+      }
+
+      const statusElement = document.getElementById("update-status")
+      if (statusElement) {
+        statusElement.textContent = "Restart scheduled..."
+        statusElement.style.color = "#1a7f1a"
+      }
+
+      setTimeout(() => location.reload(), 3000)
+    } catch (e) {
+      console.error("Restart request failed:", e)
+      alert("Failed to schedule restart")
+    }
+  }
+
+  // On the first run, updates the datetime on the clock and
+  // then updates web state
+  sendDate()
+  updateConfig()
+  loadBoardInfo()
+  loadSystemStats()
+  loadDailyRestart()
+  setInterval(loadSystemStats, 10000)
+
+  /* Clock animation */
+
+  // Stop digit
+  const digit_stop = [
+    [270, 270],
+    [270, 270],
+    [270, 270],
+    [270, 270],
+    [270, 270],
+    [270, 270]
+  ]
+
+  const digit_II = [
+    [270, 90],
+    [270, 90],
+    [270, 90],
+    [270, 90],
+    [270, 90],
+    [270, 90]
+  ]
+
+  // Number's digits
+  const digits = [
+    [    /* 0 */
+      [270, 0],
+      [270, 90],
+      [0, 90],
+      [270, 180],
+      [270, 90],
+      [180, 90]
+    ], [ /* 1 */
+      [225, 225],
+      [225, 225],
+      [225, 225],
+      [270, 270],
+      [270, 90],
+      [90, 90]
+    ], [ /* 2 */
+      [0, 0],
+      [270, 0],
+      [90, 0],
+      [180, 270],
+      [90, 180],
+      [180, 180]
+    ], [ /* 3 */
+      [0, 0],
+      [0, 0],
+      [0, 0],
+      [180, 270],
+      [180, 90],
+      [180, 90]
+    ], [ /* 4 */
+      [270, 270],
+      [90, 0],
+      [225, 225],
+      [270, 270],
+      [270, 90],
+      [90, 90]
+    ], [ /* 5 */
+      [270, 0],
+      [90, 0],
+      [0, 0],
+      [180, 180],
+      [270, 180],
+      [90, 180]
+    ], [ /* 6 */
+      [270, 0],
+      [270, 90],
+      [90, 0],
+      [180, 180],
+      [270, 180],
+      [90, 180]
+    ], [ /* 7 */
+      [0, 0],
+      [225, 225],
+      [225, 225],
+      [270, 180],
+      [270, 90],
+      [90, 90]
+    ], [ /* 8 */
+      [270, 0],
+      [90, 0],
+      [90, 0],
+      [270, 180],
+      [90, 180],
+      [90, 180]
+    ], [ /* 9 */
+      [270, 0],
+      [0, 90],
+      [0, 0],
+      [270, 180],
+      [270, 90],
+      [90, 180]
+    ]
+  ]
+
+  // Current state of the SVG animation
+  let anim_state = Array(4).fill().map(() => Array(6).fill().map(()=>[90, 90]))
+  // Internal offset state
+  let current_state = Array(4).fill().map(() => Array(6).fill().map(()=> [270, 270]))
+
+  // Sets hand[id] to specified angles
+  function setHands(id, h, m, sec) {
+    const clock = document.querySelector(`.clock--${id}`)
+    clock.style.setProperty(`--small-hand`, `${h}deg`)
+    clock.style.setProperty(`--large-hand`, `${m}deg`)
+    clock.style.setProperty(`--animation-time`, `${sec}s`)
+  }
+
+  // Calculates the difference angle in counter clockwise direction
+  function calcAngleCCW(currentAngle, targetAngle) {
+    let delta = (targetAngle - currentAngle) % 360
+    return Math.abs((delta <= 0) ? -delta : 360 - delta)
+  }
+
+  // Calculates the difference angle in clockwise direction
+  function calcAngleCW(currentAngle, targetAngle) {
+    let delta = (targetAngle - currentAngle) % 360
+    return Math.abs((delta < 0) ? 360 + delta : delta)
+  }
+
+/* Directions:
+  0 CLOCKWISE
+  1 CLOCKWISE2
+  2 CLOCKWISE3
+  3 COUNTERCLOCKWISE
+  4 COUNTERCLOCKWISE2
+  5 COUNTERCLOCKWISE3
+  6 MIN_DISTANCE
+  7 MIN_DISTANCE2
+  8 MIN_DISTANCE3
+  9 MAX_DISTANCE
+  10 MAX_DISTANCE2
+  11 MAX_DISTANCE3
+*/
+
+  // Sets half digit
+  // 0 <= index < 8
+  function setHalfDigit(index, values, direction, secs) {
+    for (let x = 0; x < 3; x++) {
+      const curr = current_state[Math.floor(index/2)][x + (index%2)*3]
+      const anim = anim_state[Math.floor(index/2)][x + (index%2)*3]
+
+      const d1 = calcAngleCW(curr[0], values[x][0])
+      const d2 = calcAngleCCW(curr[0], values[x][0])
+      const d3 = calcAngleCW(curr[1], values[x][1])
+      const d4 = calcAngleCCW(curr[1], values[x][1])
+      const multiplier = (360 * (direction%3))
+      if(direction <= 2) { // CLOCKWISE
+        curr[0] = (curr[0] - d2) % 360 
+        curr[0] = curr[0] < 0 ? curr[0] += 360 : curr[0]
+        anim[0] = anim[0] + d2 + multiplier
+        curr[1] = (curr[1] - d4) % 360
+        curr[1] = curr[1] < 0 ? curr[1] += 360 : curr[1]
+        anim[1] = anim[1] + d4 + multiplier
+      } else if(direction <= 5) { // COUNTERCLOCKWISE
+        curr[0] = (curr[0] + d1) % 360
+        anim[0] = anim[0] - d1 - multiplier
+        curr[1] = (curr[1] + d3) % 360 
+        anim[1] = anim[1] - d3 - multiplier
+      } else if(direction <= 8) { // MIN_DISTANCE
+        if(d1 <= d2) { // COUNTERCLOCKWISE
+          curr[0] = (curr[0] + d1) % 360
+          anim[0] = anim[0] - d1 - multiplier
+        } else { // CLOCKWISE
+          curr[0] = (curr[0] - d2) % 360 
+          curr[0] = curr[0] < 0 ? curr[0] += 360 : curr[0]
+          anim[0] = anim[0] + d2 + multiplier
+        }
+        if(d3 <= d4) { // COUNTERCLOCKWISE
+          curr[1] = (curr[1] + d3) % 360 
+          anim[1] = anim[1] - d3 - multiplier
+        } else { // CLOCKWISE
+          curr[1] = (curr[1] - d4) % 360
+          curr[1] = curr[1] < 0 ? curr[1] += 360 : curr[1]
+          anim[1] = anim[1] + d4 + multiplier
+        }
+      } else if(direction <= 11) { // MAX_DISTANCE
+        if(d1 >= d2) { // COUNTERCLOCKWISE
+          curr[0] = (curr[0] + d1) % 360
+          anim[0] = anim[0] - d1 - multiplier
+        } else { // CLOCKWISE
+          curr[0] = (curr[0] - d2) % 360 
+          curr[0] = curr[0] < 0 ? curr[0] += 360 : curr[0]
+          anim[0] = anim[0] + d2 + multiplier
+        }
+        if(d3 >= d4) { // COUNTERCLOCKWISE
+          curr[1] = (curr[1] + d3) % 360 
+          anim[1] = anim[1] - d3 - multiplier
+        } else { // CLOCKWISE
+          curr[1] = (curr[1] - d4) % 360
+          curr[1] = curr[1] < 0 ? curr[1] += 360 : curr[1]
+          anim[1] = anim[1] + d4 + multiplier
+        }
+      }
+      setHands(index * 3 + x, anim[0], anim[1], secs)
+    }
+  }
+
+  // Sets a digit
+  // 0 <= index < 4
+  function setDigit(index, digit, direction, secs) {
+    setHalfDigit(index*2, digit.slice(0, 3), direction, secs)
+    setHalfDigit(index*2 + 1, digit.slice(3, 6), direction, secs)
+  }
+
+  // Sets stop position
+  function setStop() {
+    for (let i = 0; i < 4; i++)
+      setDigit(i, digit_stop, 6, 15 / Math.pow(speedMultiplier, 0.7))
+  }
+
+  // Sets time with lazy animation
+  function setLazy(time) {
+    for (let i = 0; i < 4; i++)
+      setDigit(i, digits[time.charAt(i)], 6, 15 / Math.pow(speedMultiplier, 0.7))
+  }
+
+  // Sets time with fun animation
+  function setFun(time) {
+    for (let i = 0; i < 4; i++)
+      setDigit(i, digits[time.charAt(i)], 1, 16 / Math.pow(speedMultiplier, 0.7))
+  }
+
+  // Sets time with waves animation
+  function setWaves(time) {
+    const scaleFactor = Math.pow(speedMultiplier, 0.7)
+    for (let i = 0; i < 4; i++)
+      setDigit(i, digit_II, 6, 8 / scaleFactor)
+    for (let i = 0; i < 8; i++)
+      setTimeout(()=>{
+        setHalfDigit(i, digit_II, 1, 18 / scaleFactor)
+      }, (7000 + 400 * (i + 1)) / scaleFactor)
+
+    for (let i = 0; i < 4; i++)
+      setTimeout(()=>{
+        setDigit(i, digits[time.charAt(i)], 0, 15 / scaleFactor)
+      }, (7000 + 9000 + 400 *(i*2 + 1)) / scaleFactor)
+  }
+
+  // Last time setted on clock
+  let lastTime
+  
+  // Sets current time on clock
+  function setTime() {
+    const d = new Date();
+    const time = d.toTimeString().substring(0,5).replace(':', '')
+    const day = (d.getDay() + 6) % 7
+    const hours = d.getHours()
+    if (time !== lastTime && sleep[day][hours] === 0 && clockEnabled) {
+      lastTime = time
+      switch(selectedMode) {
+        case 0:
+          setLazy(lastTime)
+          break;
+        case 1:
+          setFun(lastTime)
+          break;
+        case 2:
+          setWaves(lastTime)
+          break;
+      }
+    } else if (sleep[day][hours] === 1 || !clockEnabled) {
+      setStop()
+    }
+  }
+
+  let clockInterval = undefined
+
+  // Sets an interval to update the clock periodically
+  function startClock() {
+    if(clockInterval === undefined) {
+      lastTime = undefined
+      clockInterval = setInterval(setTime, 500)
+    }
+  }
+
+  // Clears interval and set the clock on stop position
+  function stopClock() {
+    clearInterval(clockInterval)
+    clockInterval = undefined
+    setTimeout(setStop, 100 / Math.pow(speedMultiplier, 0.7))
+  }
+
+  let lastClockInterval = undefined
+
+  // Disables intervals when tab is out of focus
+  document.addEventListener("visibilitychange", (event) => {
+    if (document.visibilityState == "visible") {
+      if(lastClockInterval !== undefined)
+        clockInterval = setInterval(setTime, 500)
+    } else {
+      lastClockInterval = clockInterval
+      clearInterval(clockInterval)
+    }
+  });
+
+  // Start clock animation
+  startClock()
+</script>
+</body>
+</html>
