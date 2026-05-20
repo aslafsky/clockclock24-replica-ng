@@ -20,7 +20,8 @@ enum clock_modes
   LAZY,
   FUN,
   WAVES,
-  PROPELLER
+  PROPELLER,
+  FLUID_WAVE
 };
 
 // Virtual mode for backward compatibility
