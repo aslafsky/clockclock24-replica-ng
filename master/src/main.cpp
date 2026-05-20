@@ -261,23 +261,15 @@ void set_propeller()
 
 void set_ripple()
 {
-  
-  // Phase 1: Move to d_WAVE, then hold
   set_speed(800 * get_speed_multiplier());
   set_acceleration(150 * get_speed_multiplier());
   set_direction(MIN_DISTANCE);
   set_clock(d_WAVE);
   _delay(4000 +(9000 - 4000) / sqrt(get_speed_multiplier()));
-
-  // Phase 2: Staggered propeller spin from center outward into target.
-  // Each of the 24 clock faces starts its spin at a time proportional to
-  // its Manhattan distance from the grid centre (col=3.5, row=1.0).
-  // dist = floor(|col - 3.5| + |row - 1.0|), delay = 100ms per step.
-  // set_single_clock_full() updates only that one clock, leaving the
-  // other two in its half-digit undisturbed (change_counter trick).
-  set_speed(600 * mult);
-  set_acceleration(150 * mult);
+  set_speed(600 * get_speed_multiplier());
+  set_acceleration(500 * get_speed_multiplier());
   set_direction(CLOCKWISE3);
+
 
   t_full_clock target = get_clock_state_from_time(last_hour, last_minute);
 
