@@ -20,7 +20,8 @@ enum clock_modes
   LAZY,
   FUN,
   WAVES,
-  PROPELLER
+  PROPELLER,
+  RIPPLE
 };
 
 // Virtual mode for backward compatibility
@@ -137,7 +138,7 @@ void set_clock_mode(int value);
 void set_clock_mode_temp(int value);
 
 /**
- * Sets clock animation mode (0-2: LAZY, FUN, WAVES)
+ * Sets clock animation mode (LAZY…RIPPLE)
  * @param value   mode value of type clock_modes
  */
 void set_clock_animation_mode(int value);

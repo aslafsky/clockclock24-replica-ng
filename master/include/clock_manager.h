@@ -101,6 +101,19 @@ void set_half_digit(int index, t_half_digitl half);
 void set_half_digit_full(int index, t_half_digit half);
 
 /**
+ * Updates a single clock face (position p) within half-digit hd,
+ * leaving the other two clocks in the half-digit undisturbed.
+ * Uses the current speed/acceleration globals; mode_h and mode_m
+ * are set independently (required for propeller-style per-hand direction).
+ * @param hd     half-digit index (0 <= hd < 8)
+ * @param p      clock position within half-digit (0=top, 1=mid, 2=bot)
+ * @param lite   target angles for this clock
+ * @param mode_h direction mode for hour hand
+ * @param mode_m direction mode for minute hand
+*/
+void set_single_clock_full(int hd, int p, t_half_digitl lite, int mode_h, int mode_m);
+
+/**
  * Sets the specified time on the clock
  * @param h     hour
  * @param m     minute

@@ -166,6 +166,16 @@ void mqtt_callback(char *topic, byte *payload, unsigned int length)
                     set_clock_animation_mode(WAVES);
                     _state_update_pending = true;
                 }
+                else if (mode_value == "PROPELLER")
+                {
+                    set_clock_animation_mode(PROPELLER);
+                    _state_update_pending = true;
+                }
+                else if (mode_value == "RIPPLE")
+                {
+                    set_clock_animation_mode(RIPPLE);
+                    _state_update_pending = true;
+                }
             }
         }
 
@@ -235,7 +245,7 @@ void publish_discovery_select()
     payload += "\"value_template\":\"{{value_json.mode}}\",";
     payload += "\"qos\":0,";
     payload += "\"optimistic\":false,";
-    payload += "\"options\":[\"LAZY\",\"FUN\",\"WAVES\"],";
+    payload += "\"options\":[\"LAZY\",\"FUN\",\"WAVES\",\"PROPELLER\",\"RIPPLE\"],";
     payload += "\"device\":{";
     payload += "\"identifiers\":[\"" + hostname + "\"],";
     payload += "\"name\":\"ClockClock24\",";
@@ -286,6 +296,10 @@ const char *get_mode_string(int mode)
         return "FUN";
     case WAVES:
         return "WAVES";
+    case PROPELLER:
+        return "PROPELLER";
+    case RIPPLE:
+        return "RIPPLE";
     default:
         return "LAZY";
     }
