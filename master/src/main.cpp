@@ -48,11 +48,6 @@ void set_waves();
 void set_propeller();
 
 /**
- * Sets clock time using fluid wave animation
-*/
-void set_fluid_wave();
-
-/**
  * Sets clock to stop state
 */
 void stop();
@@ -199,9 +194,6 @@ void set_time()
       case PROPELLER:
         set_propeller();
         break;
-      case FLUID_WAVE:
-        set_fluid_wave();
-        break;
     }
   }
 }
@@ -257,124 +249,6 @@ void set_propeller()
     }
     set_half_digit_full(i, hd);
   }
-}
-
-// ─── Fluid-wave helper ────────────────────────────────────────────────────
-// Build a fully-populated t_half_digit with checkerboard per-hand directions.
-// Within each clock: mode_h and mode_m are always opposite, so hands
-// counter-rotate against each other (propeller effect per clock face).
-// The checkerboard flips which hand leads CW vs CCW between adjacent clocks,
-// producing the meshing-gear visual in Phase 3.
-//   dir_even : mode for the hour   hand when (hd_idx + row) is even
-//   dir_odd  : mode for the hour   hand when (hd_idx + row) is odd
-// The minute hand always receives the other direction.
-static t_half_digit build_fluid_hd(int hd_idx, t_half_digitl lite,
-                                   int dir_even, int dir_odd)
-{
-  t_half_digit hd = get_full_half_digit(lite);
-  for (int r = 0; r < 3; r++)
-  {
-    bool even = ((hd_idx + r) % 2 == 0);
-    hd.clocks[r].mode_h = even ? dir_even : dir_odd;
-    hd.clocks[r].mode_m = even ? dir_odd  : dir_even;
-  }
-  return hd;
-}
-
-// ─── FLUID_WAVE ───────────────────────────────────────────────────────────
-// Five-phase choreography (~37 s total, scaled by speed_multiplier).
-//
-// Column stagger: 250 ms between consecutive column sends creates the
-// travelling-wave effect.  Column 0 always leads column 7 in Phases 1–2;
-// the wave reverses to right-to-left in Phase 3.
-//
-// Hand-direction rule (checkerboard):
-//   hour hand  CW  when (col + row) even, CCW when odd.
-//   minute hand always opposite → counter-rotating pair on every clock face.
-//
-// Phase 4 uses MIN_DISTANCE + lower acceleration for ease-out convergence
-// with no overshoot on the final digit positions.
-void set_fluid_wave()
-{
-  const int mult    = get_speed_multiplier();
-  const int STAGGER = 250;  // ms column-to-column delay
-
-  // Read the new time positions now — Phase 4 converges to these.
-  t_full_clock target = get_clock_state_from_time(last_hour, last_minute);
-
-  // ─── Phase 1: Dissolution (~5 s) ──────────────────────────────────────
-  // All hands fan outward to POSE_WAVE_OPEN in a left-to-right wave.
-  set_speed(400 * mult);
-  set_acceleration(100 * mult);
-  for (int col = 0; col < 8; col++)
-  {
-    set_half_digit_full(col,
-      build_fluid_hd(col, POSE_WAVE_OPEN, CLOCKWISE, COUNTERCLOCKWISE));
-    delay(STAGGER);
-  }
-  _delay(4000 / sqrt(mult));
-
-  // ─── Phase 2a: Sweeping wave L→R — bracket / open shapes (~5 s) ───────
-  // Outer columns stay wide; inner columns compress to bracket / flat poses.
-  set_speed(600 * mult);
-  set_acceleration(120 * mult);
-  for (int col = 0; col < 8; col++)
-  {
-    t_half_digitl pose;
-    if      (col == 0 || col == 7) pose = POSE_WAVE_OPEN;
-    else if (col == 1 || col == 6) pose = POSE_WAVE_BKT_LEFT;
-    else if (col == 2 || col == 5) pose = POSE_WAVE_BKT_RIGHT;
-    else                           pose = POSE_WAVE_FLAT;
-    set_half_digit_full(col,
-      build_fluid_hd(col, pose, CLOCKWISE, COUNTERCLOCKWISE));
-    delay(STAGGER);
-  }
-  _delay(4000 / sqrt(mult));
-
-  // ─── Phase 2b: Alternating vertical / flat, L→R (~4 s) ────────────────
-  for (int col = 0; col < 8; col++)
-  {
-    t_half_digitl pose = (col % 2 == 0) ? POSE_WAVE_VERTICAL : POSE_WAVE_FLAT;
-    set_half_digit_full(col,
-      build_fluid_hd(col, pose, CLOCKWISE, COUNTERCLOCKWISE));
-    delay(STAGGER);
-  }
-  _delay(3500 / sqrt(mult));
-
-  // ─── Phase 3: Counter-rotation / breathing — R→L wave (~7 s) ──────────
-  // POSE_WAVE_BREATH differentiates rows: top=^, middle=─, bottom=v.
-  // Wave travels right-to-left; checkerboard direction flips so adjacent
-  // columns rotate opposite ways — the "meshing gear" effect.
-  set_speed(500 * mult);
-  set_acceleration(100 * mult);
-  for (int col = 7; col >= 0; col--)
-  {
-    set_half_digit_full(col,
-      build_fluid_hd(col, POSE_WAVE_BREATH, COUNTERCLOCKWISE, CLOCKWISE));
-    delay(STAGGER);
-  }
-  _delay(5000 / sqrt(mult));
-
-  // ─── Phase 4: Convergence — outer columns first, ease-out (~12 s) ─────
-  // MIN_DISTANCE guarantees the shortest-path, overshoot-free landing.
-  // Low acceleration lets the motors decelerate smoothly into position.
-  // Column order: 0,7 → 1,6 → 2,5 → 3,4 (outside in, mirrored).
-  set_speed(350 * mult);
-  set_acceleration(60 * mult);
-  set_direction(MIN_DISTANCE);
-  {
-    const int order[8] = {0, 7, 1, 6, 2, 5, 3, 4};
-    for (int i = 0; i < 8; i++)
-    {
-      int col = order[i];
-      set_half_digit(col, target.digit[col / 2].halfs[col % 2]);
-      delay(300);
-    }
-  }
-  _delay(10000 / sqrt(mult));
-
-  // ─── Phase 5: Arrival ──────────────────────────────────────────────────
-  // Motors are at their target digit positions. New time is displayed.
 }
 
 void stop()
