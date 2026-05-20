@@ -423,7 +423,7 @@
 
   // Makes modes buttons 
   function genModes() {
-    let modes = ["LAZY", "FUN", "WAVES", "PROPELLER"]
+    let modes = ["LAZY", "FUN", "WAVES", "PROPELLER", "FLUID WAVE"]
     let html = `<div id="clock-enabled" class="btn ${clockEnabled ? "active" : ""}" style="width: 100px; margin-bottom: 16px;" onclick="toggleClockEnabled()">${clockEnabled ? "ON" : "OFF"}</div>`
     let i = 0
     for (let m of modes)
@@ -1364,9 +1364,71 @@
     }
   }
 
+  // Sets time with fluid wave animation (web preview — approximates 5-phase firmware choreography)
+  // Phase 1: dissolution L→R  · Phase 2a: bracket wave  · Phase 2b: vert/flat
+  // Phase 3: breathing R→L   · Phase 4: convergence outer-in  · Phase 5: arrival
+  function setFluidWave(time) {
+    const scaleFactor = Math.pow(speedMultiplier, 0.7)
+    const moveSecs  = 8  / scaleFactor
+    const fastSecs  = 6  / scaleFactor
+    const convSecs  = 14 / scaleFactor
+    const stagger   = 250 / scaleFactor  // ms between column sends
+
+    // Intermediate half-digit poses: [[h0,m0],[h1,m1],[h2,m2]] — one pair per row
+    const poseOpen     = [[105,255],[105,255],[105,255]]
+    const poseBktLeft  = [[120,240],[120,240],[120,240]]
+    const poseBktRight = [[ 60,300],[ 60,300],[ 60,300]]
+    const poseFlat     = [[ 90,270],[ 90,270],[ 90,270]]
+    const poseVert     = [[  0,180],[  0,180],[  0,180]]
+    // Phase-3 breathing: top-row=^, mid=─, bottom=v
+    const poseBreath   = [[ 45,315],[ 90,270],[135,225]]
+
+    // Phase 1: dissolution — fan out L→R
+    for (let col = 0; col < 8; col++)
+      setTimeout(() => setHalfDigit(col, poseOpen, 6, moveSecs),
+                 col * stagger)
+
+    const t1 = 8 * stagger + 5500 / scaleFactor
+
+    // Phase 2a: bracket wave L→R — outer open, inner compressed
+    const p2shapes = [poseOpen, poseBktLeft, poseBktRight, poseFlat,
+                      poseFlat, poseBktRight, poseBktLeft, poseOpen]
+    for (let col = 0; col < 8; col++)
+      setTimeout(() => setHalfDigit(col, p2shapes[col], col % 2 === 0 ? 0 : 6, fastSecs),
+                 t1 + col * stagger)
+
+    const t2 = t1 + 8 * stagger + 5500 / scaleFactor
+
+    // Phase 2b: alternating vertical / flat L→R
+    for (let col = 0; col < 8; col++)
+      setTimeout(() => setHalfDigit(col, col % 2 === 0 ? poseVert : poseFlat, 0, fastSecs),
+                 t2 + col * stagger)
+
+    const t3 = t2 + 8 * stagger + 5000 / scaleFactor
+
+    // Phase 3: counter-rotation breathing — R→L (direction 3 = COUNTERCLOCKWISE)
+    for (let col = 7; col >= 0; col--)
+      setTimeout(() => setHalfDigit(col, poseBreath, 3, fastSecs),
+                 t3 + (7 - col) * stagger)
+
+    const t4 = t3 + 8 * stagger + 6500 / scaleFactor
+
+    // Phase 4: convergence — outer columns first, MIN_DISTANCE (6)
+    const colOrder = [0, 7, 1, 6, 2, 5, 3, 4]
+    for (let i = 0; i < 8; i++) {
+      const col  = colOrder[i]
+      const di   = Math.floor(col / 2)
+      const half = col % 2
+      const vals = digits[time.charAt(di)].slice(half * 3, half * 3 + 3)
+      setTimeout(() => setHalfDigit(col, vals, 6, convSecs),
+                 t4 + i * (350 / scaleFactor))
+    }
+    // Phase 5: arrival — setHalfDigit calls above deliver final positions
+  }
+
   // Last time setted on clock
   let lastTime
-  
+
   // Sets current time on clock
   function setTime() {
     const d = new Date();
@@ -1387,6 +1449,9 @@
           break;
         case 3:
           setPropeller(lastTime)
+          break;
+        case 4:
+          setFluidWave(lastTime)
           break;
       }
     } else if (sleep[day][hours] === 1 || !clockEnabled) {
