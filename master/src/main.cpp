@@ -48,6 +48,11 @@ void set_waves();
 void set_propeller();
 
 /**
+ * Sets clock time using ripple animation
+*/
+void set_ripple();
+
+/**
  * Sets clock to stop state
 */
 void stop();
@@ -194,6 +199,9 @@ void set_time()
       case PROPELLER:
         set_propeller();
         break;
+      case RIPPLE:
+        set_ripple();
+        break;
     }
   }
 }
@@ -248,6 +256,49 @@ void set_propeller()
       hd.clocks[j].mode_m = COUNTERCLOCKWISE3;
     }
     set_half_digit_full(i, hd);
+  }
+}
+
+void set_ripple()
+{
+  const int mult = get_speed_multiplier();
+
+  // Phase 1: Move to d_WAVE, then hold
+  set_speed(200 * mult);
+  set_acceleration(100 * mult);
+  set_direction(MIN_DISTANCE);
+  set_clock(d_WAVE);
+  _delay(8000);
+
+  // Phase 2: Staggered propeller spin from center outward into target.
+  // Each of the 24 clock faces starts its spin at a time proportional to
+  // its Manhattan distance from the grid centre (col=3.5, row=1.0).
+  // dist = floor(|col - 3.5| + |row - 1.0|), delay = 100ms per step.
+  // set_single_clock_full() updates only that one clock, leaving the
+  // other two in its half-digit undisturbed (change_counter trick).
+  set_speed(600 * mult);
+  set_acceleration(150 * mult);
+  set_direction(CLOCKWISE3);
+
+  t_full_clock target = get_clock_state_from_time(last_hour, last_minute);
+
+  const int MAX_DIST = 4; // floor(3.5 + 1.0) = 4
+  for (int d = 0; d <= MAX_DIST; d++)
+  {
+    for (int hd = 0; hd < 8; hd++)
+    {
+      t_half_digitl lite = target.digit[hd / 2].halfs[hd % 2];
+      for (int p = 0; p < 3; p++)
+      {
+        float col_dist = fabsf((float)hd - 3.5f);
+        float row_dist = fabsf((float)p - 1.0f);
+        int dist = (int)(col_dist + row_dist); // floor via truncation
+        if (dist == d)
+          set_single_clock_full(hd, p, lite, CLOCKWISE3, COUNTERCLOCKWISE3);
+      }
+    }
+    if (d < MAX_DIST)
+      delay(100);
   }
 }
 
