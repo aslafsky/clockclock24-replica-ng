@@ -99,6 +99,14 @@ void set_digit(int index, t_digit digit)
   _counter++;
 }
 
+// 0 <= index < 8 — accepts a pre-built t_half_digit (per-hand direction control)
+void set_half_digit_full(int index, t_half_digit half)
+{
+    send_half_digit(index, half);
+    _last_state[index] = half;
+    _counter++;
+}
+
 // 0 <= index < 8
 void set_half_digit(int index, t_half_digitl half)
 {
