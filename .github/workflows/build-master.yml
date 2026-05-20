@@ -7,6 +7,7 @@ on:
       - 'v*'
   pull_request:
     branches: [ master, main ]
+  workflow_dispatch:
 
 jobs:
   build:
@@ -56,35 +57,28 @@ jobs:
   release:
     needs: build
     runs-on: ubuntu-latest
-    if: github.event_name == 'push' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master')
-    
+    if: github.event_name == 'push' || github.event_name == 'workflow_dispatch'
+    permissions:
+      contents: write
+
     steps:
       - uses: actions/checkout@v4
-      
-      - name: Get short SHA
-        id: short-sha
-        run: echo "sha=$(git rev-parse --short HEAD)" >> $GITHUB_OUTPUT
-      
-      - name: Create tag for commit
-        run: |
-          git tag ${{ steps.short-sha.outputs.sha }}
-          git push origin ${{ steps.short-sha.outputs.sha }}
-      
+
       - name: Download all artifacts
         uses: actions/download-artifact@v4
         with:
           path: artifacts
           pattern: '*'
           merge-multiple: false
-      
+
       - name: Create/Update Latest Release
-        uses: softprops/action-gh-release@v1
+        uses: softprops/action-gh-release@v2
         with:
           tag_name: latest
           name: Latest Build
           body: |
             Latest automatic build from commit ${{ github.sha }}
-            
+
             Built on: ${{ github.event.head_commit.timestamp }}
             Commit: ${{ github.event.head_commit.message }}
           files: |
@@ -92,5 +86,6 @@ jobs:
             artifacts/firmware-binaries/lolin_s3_mini.bin
           prerelease: false
           draft: false
+          make_latest: true
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
