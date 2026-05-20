@@ -261,14 +261,13 @@ void set_propeller()
 
 void set_ripple()
 {
-  const int mult = get_speed_multiplier();
-
+  
   // Phase 1: Move to d_WAVE, then hold
-  set_speed(200 * mult);
-  set_acceleration(100 * mult);
+  set_speed(800 * get_speed_multiplier());
+  set_acceleration(150 * get_speed_multiplier());
   set_direction(MIN_DISTANCE);
   set_clock(d_WAVE);
-  _delay(8000);
+  _delay(4000 +(9000 - 4000) / sqrt(get_speed_multiplier()));
 
   // Phase 2: Staggered propeller spin from center outward into target.
   // Each of the 24 clock faces starts its spin at a time proportional to
