@@ -84,13 +84,21 @@ void set_clock(t_full_clock clock_state);
 */
 void set_digit(int index, t_digit digit);
 
-/** 
+/**
  * Sends a half digit to the specified board and increments
  * the state counter
  * @param index     digit index (0 <= index < 8)
  * @param half      hlaf digit value
 */
 void set_half_digit(int index, t_half_digitl half);
+
+/**
+ * Sends a pre-built full half digit to the specified board and increments
+ * the state counter. Use when mode_h/mode_m must differ per hand.
+ * @param index     digit index (0 <= index < 8)
+ * @param half      fully populated t_half_digit
+*/
+void set_half_digit_full(int index, t_half_digit half);
 
 /** 
  * Sets the specified time on the clock
