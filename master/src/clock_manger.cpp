@@ -108,14 +108,6 @@ void set_half_digit(int index, t_half_digitl half)
     _counter++;
 }
 
-// 0 <= index < 8  — accepts a pre-built t_half_digit (e.g. with mixed per-hand modes)
-void set_half_digit_full(int index, t_half_digit half)
-{
-    send_half_digit(index, half);
-    _last_state[index] = half;
-    _counter++;
-}
-
 void set_clock_time(int h, int m)
 {
   if(h < 0 || h > 99 || m < 0 || m > 99 )

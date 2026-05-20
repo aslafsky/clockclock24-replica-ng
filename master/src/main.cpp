@@ -247,7 +247,7 @@ void set_propeller()
       hd.clocks[j].mode_h = CLOCKWISE3;
       hd.clocks[j].mode_m = COUNTERCLOCKWISE3;
     }
-    set_half_digit_full(i, hd);
+    send_half_digit(i, hd);
   }
 }
 
