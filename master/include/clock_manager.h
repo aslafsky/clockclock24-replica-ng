@@ -92,7 +92,15 @@ void set_digit(int index, t_digit digit);
 */
 void set_half_digit(int index, t_half_digitl half);
 
-/** 
+/**
+ * Sends a pre-built half digit to the specified board and increments
+ * the state counter (use when per-hand direction control is needed)
+ * @param index     board index (0 <= index < 8)
+ * @param half      fully populated t_half_digit
+*/
+void set_half_digit_full(int index, t_half_digit half);
+
+/**
  * Sets the specified time on the clock
  * @param h     hour
  * @param m     minute
