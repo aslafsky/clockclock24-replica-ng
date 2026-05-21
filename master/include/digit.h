@@ -138,23 +138,42 @@ const t_full_clock d_fun = {digit_fun, digit_fun, digit_fun, digit_fun};
 const t_full_clock d_IIII = {digit_I, digit_I, digit_I, digit_I};
 
 const t_digit digit_wave_a = {
-  340, 340,
-  200, 340,
-  160, 160,
-  340, 340,
-  200, 340,
-  160, 160
+  70, 255,
+  85, 275,
+  105, 290,
+  60, 250,
+  85, 275,
+  110, 300
 };
 
 const t_digit digit_wave_b = {
-  315, 60,
-  195, 330,
-  120, 90,
-  285, 80,
-  165, 315,
-  75, 110
+  45, 245,
+  80, 280,
+  115, 315,
+  15, 220,
+  60, 300,
+  140, 345
 };
 
-const t_full_clock d_WAVE = {digit_wave_a, digit_wave_b, digit_wave_b, digit_wave_a};
+// Left-right mirrors (columns swapped, angles reflected: theta -> 180 - theta)
+const t_digit digit_wave_a_mirror = {
+  120, 290,
+  95, 265,
+  70, 240,
+  110, 285,
+  95, 265,
+  75, 250
+};
+
+const t_digit digit_wave_b_mirror = {
+  165, 320,
+  120, 240,
+  40, 195,
+  135, 295,
+  100, 260,
+  65, 225
+};
+
+const t_full_clock d_WAVE = {digit_wave_a, digit_wave_b, digit_wave_b_mirror, digit_wave_a_mirror};
 
 #endif

@@ -75,16 +75,16 @@
     .clock-smallHand,
     .clock-largeHand {
       transform-origin: 50px center;
-      transition-timing-function: ease;
-      transition: transform var(--animation-time);
     }
-    
+
     .clock-smallHand {
       transform: rotateZ(var(--small-hand));
+      transition: transform var(--animation-time-small, var(--animation-time)) ease;
     }
-    
+
     .clock-largeHand {
       transform: rotateZ(var(--large-hand));
+      transition: transform var(--animation-time-large, var(--animation-time)) ease;
     }
     
     .hidden .btn-clock {
@@ -1200,11 +1200,13 @@
   let current_state = Array(4).fill().map(() => Array(6).fill().map(()=> [270, 270]))
 
   // Sets hand[id] to specified angles
-  function setHands(id, h, m, sec) {
+  function setHands(id, h, m, sec, secM = sec) {
     const clock = document.querySelector(`.clock--${id}`)
     clock.style.setProperty(`--small-hand`, `${h}deg`)
     clock.style.setProperty(`--large-hand`, `${m}deg`)
     clock.style.setProperty(`--animation-time`, `${sec}s`)
+    clock.style.setProperty(`--animation-time-small`, `${sec}s`)
+    clock.style.setProperty(`--animation-time-large`, `${secM}s`)
   }
 
   // Calculates the difference angle in counter clockwise direction
@@ -1376,10 +1378,12 @@
     const holdMs    = 8000 / scaleFactor // Phase 1 hold before spins start
     const spinSecs  = 14 / scaleFactor   // Phase 2 spin duration
 
-    // d_WAVE angles per digit index [0..3]: wave_a, wave_b, wave_b, wave_a
-    const dWaveA = [[340,340],[200,340],[160,160],[340,340],[200,340],[160,160]]
-    const dWaveB = [[315,60],[195,330],[120,90],[285,80],[165,315],[75,110]]
-    const waveDigits = [dWaveA, dWaveB, dWaveB, dWaveA]
+    // d_WAVE angles per digit index [0..3]: wave_a, wave_b, wave_b_mirror, wave_a_mirror
+    const dWaveA = [[70,255],[85,275],[105,290],[60,250],[85,275],[110,300]]
+    const dWaveB = [[45,245],[80,280],[115,315],[15,220],[60,300],[140,345]]
+    const dWaveAm = [[120,290],[95,265],[70,240],[110,285],[95,265],[75,250]]
+    const dWaveBm = [[165,320],[120,240],[40,195],[135,295],[100,260],[65,225]]
+    const waveDigits = [dWaveA, dWaveB, dWaveBm, dWaveAm]
 
     // Phase 1: move all digits to d_WAVE using MIN_DISTANCE (direction 6)
     for (let i = 0; i < 4; i++)
@@ -1398,21 +1402,36 @@
           if (dist !== d) continue
           const curr = current_state[di][p + half * 3]
           const anim = anim_state[di][p + half * 3]
-          // Calculate shortest-path distances from current (d_WAVE) to target
-          const d2 = calcAngleCCW(curr[0], values[p][0]) // used for CW h-hand
-          const d3 = calcAngleCW(curr[1],  values[p][1]) // used for CCW m-hand
-          // Update current_state to target so it is ready for the next mode
-          curr[0] = ((curr[0] - d2) % 360 + 360) % 360
-          curr[1] = (curr[1] + d3) % 360
-          // Capture per-clock values for the closure
-          const dh = d2 + 720  // CLOCKWISE3: +2 extra CW rotations
-          const dm = d3 + 720  // COUNTERCLOCKWISE3: +2 extra CCW rotations
+          // Mirror rotation direction for the right half (half-digits 4-7)
+          let dh, dm
+          if (hd < 4) {
+            // CLOCKWISE3 h-hand, COUNTERCLOCKWISE3 m-hand
+            const d2 = calcAngleCCW(curr[0], values[p][0])
+            const d3 = calcAngleCW(curr[1],  values[p][1])
+            curr[0] = ((curr[0] - d2) % 360 + 360) % 360
+            curr[1] = (curr[1] + d3) % 360
+            dh = d2 + 720   // +2 extra CW rotations
+            dm = d3 + 720   // +2 extra CCW rotations
+          } else {
+            // mirrored: COUNTERCLOCKWISE3 h-hand, CLOCKWISE3 m-hand
+            const d2 = calcAngleCW(curr[0], values[p][0])
+            const d3 = calcAngleCCW(curr[1], values[p][1])
+            curr[0] = (curr[0] + d2) % 360
+            curr[1] = ((curr[1] - d3) % 360 + 360) % 360
+            dh = -(d2 + 720)
+            dm = -(d3 + 720)
+          }
           const ci = hd * 3 + p
           const delay = holdMs + d * 100
+          // Per-hand duration proportional to travel so both hands move at
+          // the same angular speed and acceleration (matches firmware).
+          const waveSpeed = (720 + 360) / spinSecs // deg per sec
+          const secH = Math.abs(dh) / waveSpeed
+          const secM = Math.abs(dm) / waveSpeed
           setTimeout(() => {
             anim[0] += dh
             anim[1] -= dm
-            setHands(ci, anim[0], anim[1], spinSecs)
+            setHands(ci, anim[0], anim[1], secH, secM)
           }, delay)
         }
       }
