@@ -278,6 +278,9 @@ void set_ripple()
   {
     for (int hd = 0; hd < 8; hd++)
     {
+      // Mirror rotation direction for the right half (half-digits 4-7)
+      int mode_h = (hd < 4) ? CLOCKWISE3 : COUNTERCLOCKWISE3;
+      int mode_m = (hd < 4) ? COUNTERCLOCKWISE3 : CLOCKWISE3;
       t_half_digitl lite = target.digit[hd / 2].halfs[hd % 2];
       for (int p = 0; p < 3; p++)
       {
@@ -285,7 +288,7 @@ void set_ripple()
         float row_dist = fabsf((float)p - 1.0f);
         int dist = (int)(col_dist + row_dist); // floor via truncation
         if (dist == d)
-          set_single_clock_full(hd, p, lite, CLOCKWISE3, COUNTERCLOCKWISE3);
+          set_single_clock_full(hd, p, lite, mode_h, mode_m);
       }
     }
     if (d < MAX_DIST)
