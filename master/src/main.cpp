@@ -292,7 +292,7 @@ void set_ripple()
       }
     }
     if (d < MAX_DIST)
-      delay(200);
+      delay(400);
   }
 }
 
