@@ -265,7 +265,7 @@ void set_ripple()
   set_acceleration(150 * get_speed_multiplier());
   set_direction(MIN_DISTANCE);
   set_clock(d_WAVE);
-  _delay(6000 +(9000 - 4000) / sqrt(get_speed_multiplier()));
+  _delay(5000 +(9000 - 4000) / sqrt(get_speed_multiplier()));
   set_speed(600 * get_speed_multiplier());
   set_acceleration(500 * get_speed_multiplier());
   set_direction(CLOCKWISE3);
@@ -292,7 +292,7 @@ void set_ripple()
       }
     }
     if (d < MAX_DIST)
-      delay(100);
+      delay(200);
   }
 }
 
