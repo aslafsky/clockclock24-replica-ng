@@ -177,7 +177,7 @@ const t_digit digit_wave_b_mirror = {
 const t_full_clock d_WAVE = {digit_wave_a, digit_wave_b, digit_wave_b_mirror, digit_wave_a_mirror};
 
 // All hands pointing down-left (225 deg) - uniform "joint" pose
-const t_digit digit_joint = {
+const t_digit digit_JOINT = {
   225, 225,
   225, 225,
   225, 225,
