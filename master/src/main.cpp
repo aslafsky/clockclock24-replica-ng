@@ -312,7 +312,7 @@ void set_arrow()
       }
     }
     if (group_has_clock && proj < MAX_PROJ)
-      delay(200);
+      delay(100);
   }
 }
 
