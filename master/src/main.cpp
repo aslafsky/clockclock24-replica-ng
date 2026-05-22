@@ -277,8 +277,8 @@ void set_arrow()
   _delay(5000 + (9000 - 4000) / sqrt(get_speed_multiplier()));
 
   // Phase 2: staggered propeller spin into the target time.
-  set_speed(600 * get_speed_multiplier());
-  set_acceleration(500 * get_speed_multiplier());
+  set_speed(500 * get_speed_multiplier());
+  set_acceleration(100 * get_speed_multiplier());
   set_direction(CLOCKWISE3);
 
   t_full_clock target = get_clock_state_from_time(last_hour, last_minute);
