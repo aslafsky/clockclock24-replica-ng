@@ -1484,10 +1484,15 @@
         // Diagonal index = col + (2 - row): bottom-left (0) -> top-right (9)
         const diag = hd + (2 - p)
         const delay = holdMs + diag * 200
+        // Per-hand duration proportional to travel so both hands move at
+        // the same angular speed and acceleration (matches firmware).
+        const arrowSpeed = (720 + 360) / spinSecs // deg per sec
+        const secH = dh / arrowSpeed
+        const secM = dm / arrowSpeed
         setTimeout(() => {
           anim[0] += dh
           anim[1] -= dm
-          setHands(ci, anim[0], anim[1], spinSecs)
+          setHands(ci, anim[0], anim[1], secH, secM)
         }, delay)
       }
     }
