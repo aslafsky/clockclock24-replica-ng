@@ -1463,7 +1463,21 @@
     for (let i = 0; i < 4; i++)
       setDigit(i, digit_joint, 6, jointSecs)
 
-    // Phase 2: staggered diagonal propeller spin into target.
+    // Phase 2: staggered propeller spin into target.
+    // Wavefront perpendicular to the line through the top-left (row 0, col 0)
+    // and bottom-right (row 2, col 7) sub-clocks. That line has direction
+    // (7, 2) in (col, row) space, so the perpendicular is (2, -7) and a
+    // clock's projection onto it is proj = 2*col - 7*row (-14 at bottom-left
+    // row 2 col 0, +14 at top-right row 0 col 7). Clocks sharing a projection
+    // spin together; successive groups are staggered 200ms apart.
+    const projOf = (col, row) => 2 * col - 7 * row
+    const projSet = new Set()
+    for (let c = 0; c < 8; c++)
+      for (let r = 0; r < 3; r++)
+        projSet.add(projOf(c, r))
+    const projRank = new Map(
+      [...projSet].sort((a, b) => a - b).map((v, i) => [v, i]))
+
     // current_state is already updated to d_joint angles by setDigit above.
     for (let hd = 0; hd < 8; hd++) {
       const di   = Math.floor(hd / 2)
@@ -1481,9 +1495,9 @@
         curr[1] = (curr[1] + d3) % 360
         const dm = d3 + 720
         const ci = hd * 3 + p
-        // Diagonal index = col + (2 - row): bottom-left (0) -> top-right (9)
-        const diag = hd + (2 - p)
-        const delay = holdMs + diag * 200
+        // Stagger by rank along the perpendicular wavefront (bottom-left first)
+        const rank = projRank.get(projOf(hd, p))
+        const delay = holdMs + rank * 200
         // Per-hand duration proportional to travel so both hands move at
         // the same angular speed and acceleration (matches firmware).
         const arrowSpeed = (720 + 360) / spinSecs // deg per sec
