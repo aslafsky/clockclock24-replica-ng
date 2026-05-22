@@ -185,7 +185,7 @@ void set_clock_mode_temp(int value)
 
 void set_clock_animation_mode(int value)
 {
-  if (value >= LAZY && value <= GEAR) {
+  if (value >= LAZY && value <= SCATTER) {
     _clock_mode = value;
     prefs.putInt("clock_mode", value);
   }

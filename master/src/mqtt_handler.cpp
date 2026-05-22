@@ -196,6 +196,11 @@ void mqtt_callback(char *topic, byte *payload, unsigned int length)
                     set_clock_animation_mode(GEAR);
                     _state_update_pending = true;
                 }
+                else if (mode_value == "SCATTER")
+                {
+                    set_clock_animation_mode(SCATTER);
+                    _state_update_pending = true;
+                }
             }
         }
 
@@ -265,7 +270,7 @@ void publish_discovery_select()
     payload += "\"value_template\":\"{{value_json.mode}}\",";
     payload += "\"qos\":0,";
     payload += "\"optimistic\":false,";
-    payload += "\"options\":[\"LAZY\",\"FUN\",\"WAVES\",\"PROPELLER\",\"ARROW\",\"RIPPLE\",\"GLOBE\",\"BUBBLE\",\"GEAR\"],";
+    payload += "\"options\":[\"LAZY\",\"FUN\",\"WAVES\",\"PROPELLER\",\"ARROW\",\"RIPPLE\",\"GLOBE\",\"BUBBLE\",\"GEAR\",\"SCATTER\"],";
     payload += "\"device\":{";
     payload += "\"identifiers\":[\"" + hostname + "\"],";
     payload += "\"name\":\"ClockClock24\",";
@@ -328,6 +333,8 @@ const char *get_mode_string(int mode)
         return "BUBBLE";
     case GEAR:
         return "GEAR";
+    case SCATTER:
+        return "SCATTER";
     default:
         return "LAZY";
     }
