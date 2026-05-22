@@ -423,7 +423,7 @@
 
   // Makes modes buttons 
   function genModes() {
-    let modes = ["LAZY", "FUN", "WAVES", "PROPELLER", "RIPPLE"]
+    let modes = ["LAZY", "FUN", "WAVES", "PROPELLER", "ARROW", "RIPPLE"]
     let html = `<div id="clock-enabled" class="btn ${clockEnabled ? "active" : ""}" style="width: 100px; margin-bottom: 16px;" onclick="toggleClockEnabled()">${clockEnabled ? "ON" : "OFF"}</div>`
     let i = 0
     for (let m of modes)
@@ -1119,6 +1119,16 @@
     [270, 90]
   ]
 
+  // d_joint: all hands at 225 deg (down-left)
+  const digit_joint = [
+    [225, 225],
+    [225, 225],
+    [225, 225],
+    [225, 225],
+    [225, 225],
+    [225, 225]
+  ]
+
   // Number's digits
   const digits = [
     [    /* 0 */
@@ -1437,6 +1447,52 @@
       }
     }
   }
+  // Sets time with arrow animation
+  // Phase 1: all clocks move to d_joint (MIN_DISTANCE).
+  // Phase 2: after hold, each clock spins h-hand CW + m-hand CCW (CLOCKWISE3 /
+  //          COUNTERCLOCKWISE3 = 2 extra rotations) into the target digit,
+  //          staggered diagonally from the bottom-left clock (row 2, col 0)
+  //          to the top-right (row 0, col 7), 200ms per diagonal.
+  function setArrow(time) {
+    const scaleFactor = Math.pow(speedMultiplier, 0.7)
+    const jointSecs = 8  / scaleFactor   // Phase 1 travel time
+    const holdMs    = 8000 / scaleFactor // Phase 1 hold before spins start
+    const spinSecs  = 14 / scaleFactor   // Phase 2 spin duration
+
+    // Phase 1: move all digits to d_joint using MIN_DISTANCE (direction 6)
+    for (let i = 0; i < 4; i++)
+      setDigit(i, digit_joint, 6, jointSecs)
+
+    // Phase 2: staggered diagonal propeller spin into target.
+    // current_state is already updated to d_joint angles by setDigit above.
+    for (let hd = 0; hd < 8; hd++) {
+      const di   = Math.floor(hd / 2)
+      const half = hd % 2
+      const values = digits[time.charAt(di)].slice(half * 3, half * 3 + 3)
+      for (let p = 0; p < 3; p++) {
+        const curr = current_state[di][p + half * 3]
+        const anim = anim_state[di][p + half * 3]
+        // h-hand: CLOCKWISE3 (direction 2) — 2 extra full CW rotations
+        const d2 = calcAngleCCW(curr[0], values[p][0])
+        curr[0] = ((curr[0] - d2) % 360 + 360) % 360
+        const dh = d2 + 720
+        // m-hand: COUNTERCLOCKWISE3 (direction 5) — 2 extra full CCW rotations
+        const d3 = calcAngleCW(curr[1], values[p][1])
+        curr[1] = (curr[1] + d3) % 360
+        const dm = d3 + 720
+        const ci = hd * 3 + p
+        // Diagonal index = col + (2 - row): bottom-left (0) -> top-right (9)
+        const diag = hd + (2 - p)
+        const delay = holdMs + diag * 200
+        setTimeout(() => {
+          anim[0] += dh
+          anim[1] -= dm
+          setHands(ci, anim[0], anim[1], spinSecs)
+        }, delay)
+      }
+    }
+  }
+
   // Last time setted on clock
   let lastTime
   
@@ -1462,6 +1518,9 @@
           setPropeller(lastTime)
           break;
         case 4:
+          setArrow(lastTime)
+          break;
+        case 5:
           setRipple(lastTime)
           break;
       }

@@ -21,6 +21,7 @@ enum clock_modes
   FUN,
   WAVES,
   PROPELLER,
+  ARROW,
   RIPPLE
 };
 
@@ -138,7 +139,7 @@ void set_clock_mode(int value);
 void set_clock_mode_temp(int value);
 
 /**
- * Sets clock animation mode (LAZY…RIPPLE)
+ * Sets clock animation mode (LAZYï¿½RIPPLE)
  * @param value   mode value of type clock_modes
  */
 void set_clock_animation_mode(int value);
