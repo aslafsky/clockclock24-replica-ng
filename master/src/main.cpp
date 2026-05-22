@@ -48,6 +48,11 @@ void set_waves();
 void set_propeller();
 
 /**
+ * Sets clock time using arrow animation
+*/
+void set_arrow();
+
+/**
  * Sets clock time using ripple animation
 */
 void set_ripple();
@@ -199,6 +204,9 @@ void set_time()
       case PROPELLER:
         set_propeller();
         break;
+      case ARROW:
+        set_arrow();
+        break;
       case RIPPLE:
         set_ripple();
         break;
@@ -256,6 +264,45 @@ void set_propeller()
       hd.clocks[j].mode_m = COUNTERCLOCKWISE3;
     }
     set_half_digit_full(i, hd);
+  }
+}
+
+void set_arrow()
+{
+  // Phase 1: move all 24 clocks to d_joint using MIN_DISTANCE, then hold.
+  set_speed(600 * get_speed_multiplier());
+  set_acceleration(150 * get_speed_multiplier());
+  set_direction(MIN_DISTANCE);
+  set_clock(d_joint);
+  _delay(5000 + (9000 - 4000) / sqrt(get_speed_multiplier()));
+
+  // Phase 2: staggered propeller spin into the target time.
+  set_speed(600 * get_speed_multiplier());
+  set_acceleration(500 * get_speed_multiplier());
+  set_direction(CLOCKWISE3);
+
+  t_full_clock target = get_clock_state_from_time(last_hour, last_minute);
+
+  // Diagonal stagger: index = col + (2 - row), 0..9. Starts at the
+  // bottom-left clock (row 2, col 0) and ends at the top-right (row 0, col 7).
+  const int MAX_DIAG = 9; // 7 + (2 - 0)
+  for (int diag = 0; diag <= MAX_DIAG; diag++)
+  {
+    for (int hd = 0; hd < 8; hd++)
+    {
+      t_half_digitl lite = target.digit[hd / 2].halfs[hd % 2];
+      for (int p = 0; p < 3; p++)
+      {
+        int col = hd;
+        int row = p;
+        // Each clock spins h-hand CW and m-hand CCW with 2 extra full
+        // rotations (CLOCKWISE3 / COUNTERCLOCKWISE3) into the target.
+        if (col + (2 - row) == diag)
+          set_single_clock_full(hd, p, lite, CLOCKWISE3, COUNTERCLOCKWISE3);
+      }
+    }
+    if (diag < MAX_DIAG)
+      delay(200);
   }
 }
 
