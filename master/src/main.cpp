@@ -68,6 +68,11 @@ void set_globe();
 void set_bubble();
 
 /**
+ * Sets clock time using gear animation
+*/
+void set_gear();
+
+/**
  * Sets clock to stop state
 */
 void stop();
@@ -225,6 +230,9 @@ void set_time()
         break;
       case BUBBLE:
         set_bubble();
+        break;
+      case GEAR:
+        set_gear();
         break;
     }
   }
@@ -414,6 +422,49 @@ void set_bubble()
       hd.clocks[j].mode_m = COUNTERCLOCKWISE3;
     }
     set_half_digit_full(i, hd);
+  }
+}
+
+void set_gear()
+{
+  // Phase 1: move all 24 clocks to d_CENT using MIN_DISTANCE, then hold.
+  set_speed(600 * get_speed_multiplier());
+  set_acceleration(150 * get_speed_multiplier());
+  set_direction(MIN_DISTANCE);
+  set_clock(d_CENT);
+  _delay(5000 + (9000 - 4000) / sqrt(get_speed_multiplier()));
+
+  // Phase 2: staggered propeller spin into the target time.
+  set_speed(450 * get_speed_multiplier());
+  set_acceleration(100 * get_speed_multiplier());
+  set_direction(CLOCKWISE3);
+
+  t_full_clock target = get_clock_state_from_time(last_hour, last_minute);
+
+  // Stagger outwards from the centre in a square (Chebyshev) radius.
+  // group = max(col_dist, row_dist) where col_dist = min(|hd-3|,|hd-4|) and
+  // row_dist = |p-1|. Group 0 is the centre pair (row 1, cols 3-4), group 3
+  // is the outermost columns 0 and 7. Successive groups are staggered 100ms.
+  const int MAX_GROUP = 3;
+  for (int g = 0; g <= MAX_GROUP; g++)
+  {
+    for (int hd = 0; hd < 8; hd++)
+    {
+      // Columns 0-3 spin counter-clockwise, columns 4-7 spin clockwise.
+      int mode_h = (hd < 4) ? COUNTERCLOCKWISE3 : CLOCKWISE3;
+      int mode_m = (hd < 4) ? CLOCKWISE3 : COUNTERCLOCKWISE3;
+      t_half_digitl lite = target.digit[hd / 2].halfs[hd % 2];
+      for (int p = 0; p < 3; p++)
+      {
+        int col_dist = min(abs(hd - 3), abs(hd - 4));
+        int row_dist = abs(p - 1);
+        int group = max(col_dist, row_dist);
+        if (group == g)
+          set_single_clock_full(hd, p, lite, mode_h, mode_m);
+      }
+    }
+    if (g < MAX_GROUP)
+      delay(100);
   }
 }
 
