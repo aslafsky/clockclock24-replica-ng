@@ -22,7 +22,8 @@ enum clock_modes
   WAVES,
   PROPELLER,
   ARROW,
-  RIPPLE
+  RIPPLE,
+  GLOBE
 };
 
 // Virtual mode for backward compatibility
@@ -139,7 +140,7 @@ void set_clock_mode(int value);
 void set_clock_mode_temp(int value);
 
 /**
- * Sets clock animation mode (LAZY�RIPPLE)
+ * Sets clock animation mode (LAZY�GLOBE)
  * @param value   mode value of type clock_modes
  */
 void set_clock_animation_mode(int value);
