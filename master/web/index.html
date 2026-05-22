@@ -1666,7 +1666,8 @@
   // Phase 1: all clocks move to d_CENT (MIN_DISTANCE).
   // Phase 2: after hold, each clock spins into the target digit, staggered
   //          outwards from the centre in a square (Chebyshev) radius, 100ms
-  //          per ring. Columns 0-3 spin CCW, columns 4-7 spin CW.
+  //          per ring. Columns 0-3 spin CCW, columns 4-7 spin CW; both hands
+  //          of each sub-clock rotate the same direction at the same speed.
   function setGear(time) {
     const scaleFactor = Math.pow(speedMultiplier, 0.7)
     const centSecs = 8  / scaleFactor   // Phase 1 travel time
@@ -1699,21 +1700,21 @@
         const anim = anim_state[di][p + half * 3]
         let dh, dm
         if (hd < 4) {
-          // columns 0-3: COUNTERCLOCKWISE3 h-hand, CLOCKWISE3 m-hand
+          // columns 0-3: both hands counter-clockwise, same speed
           const d2 = calcAngleCW(curr[0], values[p][0])
-          const d3 = calcAngleCCW(curr[1], values[p][1])
-          curr[0] = (curr[0] + d2) % 360
-          curr[1] = ((curr[1] - d3) % 360 + 360) % 360
-          dh = -(d2 + 720)
-          dm = -(d3 + 720)
-        } else {
-          // columns 4-7: CLOCKWISE3 h-hand, COUNTERCLOCKWISE3 m-hand
-          const d2 = calcAngleCCW(curr[0], values[p][0])
           const d3 = calcAngleCW(curr[1], values[p][1])
-          curr[0] = ((curr[0] - d2) % 360 + 360) % 360
+          curr[0] = (curr[0] + d2) % 360
           curr[1] = (curr[1] + d3) % 360
-          dh = d2 + 720
+          dh = -(d2 + 720)
           dm = d3 + 720
+        } else {
+          // columns 4-7: both hands clockwise, same speed
+          const d2 = calcAngleCCW(curr[0], values[p][0])
+          const d3 = calcAngleCCW(curr[1], values[p][1])
+          curr[0] = ((curr[0] - d2) % 360 + 360) % 360
+          curr[1] = ((curr[1] - d3) % 360 + 360) % 360
+          dh = d2 + 720
+          dm = -(d3 + 720)
         }
         const ci = hd * 3 + p
         const delay = holdMs + group * 100
