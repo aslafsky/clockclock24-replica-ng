@@ -80,7 +80,7 @@ void loop1()
       if(current_clocks_state.clocks[i].mode_m == ADJUST_HAND)
         adjust_m_hand(i, current_clocks_state.clocks[i].adjust_m);
 
-      if(current_clocks_state.clocks[i].mode_h <= MAX_DISTANCE3)
+      if(current_clocks_state.clocks[i].mode_h != ADJUST_HAND)
         set_clock(i, current_clocks_state.clocks[i]);
     }
   }

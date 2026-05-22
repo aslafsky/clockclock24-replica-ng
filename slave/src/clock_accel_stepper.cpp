@@ -65,6 +65,12 @@ void ClockAccelStepper::moveToAngle(int angle, int direction)
     direction = delta1 > delta2 ? CLOCKWISE : COUNTERCLOCKWISE; // if == COUNTERCLOCKWISE
     delta = delta1 > delta2 ? delta1 : delta2;
   }
+  else if (direction == COUNTERCLOCKWISE5) // COUNTERCLOCKWISE, 4 extra rotations
+  {
+    delta = calcAngleCounterclockwise(_current_angle, angle);
+    multiplier = 4;
+    direction = COUNTERCLOCKWISE;
+  }
 
   _current_angle = angle;
   int steps = delta * _max_steps / 360;
