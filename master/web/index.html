@@ -423,7 +423,7 @@
 
   // Makes modes buttons 
   function genModes() {
-    let modes = ["LAZY", "FUN", "WAVES", "PROPELLER", "ARROW", "RIPPLE", "GLOBE", "BUBBLE"]
+    let modes = ["LAZY", "FUN", "WAVES", "PROPELLER", "ARROW", "RIPPLE", "GLOBE", "BUBBLE", "GEAR"]
     let html = `<div id="clock-enabled" class="btn ${clockEnabled ? "active" : ""}" style="width: 100px; margin-bottom: 16px;" onclick="toggleClockEnabled()">${clockEnabled ? "ON" : "OFF"}</div>`
     let i = 0
     for (let m of modes)
@@ -1628,6 +1628,75 @@
     }
   }
 
+  // Sets time with gear animation
+  // Phase 1: all clocks move to d_CENT (MIN_DISTANCE).
+  // Phase 2: after hold, each clock spins into the target digit, staggered
+  //          outwards from the centre in a square (Chebyshev) radius, 100ms
+  //          per ring. Columns 0-3 spin CCW, columns 4-7 spin CW.
+  function setGear(time) {
+    const scaleFactor = Math.pow(speedMultiplier, 0.7)
+    const centSecs = 8  / scaleFactor   // Phase 1 travel time
+    const holdMs   = 8000 / scaleFactor // Phase 1 hold before spins start
+    const spinSecs = 14 / scaleFactor   // Phase 2 spin duration
+
+    // d_CENT angles per digit index [0..3]: cent_a, cent_b, cent_b_mirror, cent_a_mirror
+    const dCentA  = [[345,345],[0,0],[15,15],[330,330],[0,0],[30,30]]
+    const dCentB  = [[315,315],[0,0],[45,45],[300,300],[0,0],[60,60]]
+    const dCentAm = [[210,210],[180,180],[150,150],[195,195],[180,180],[165,165]]
+    const dCentBm = [[240,240],[180,180],[120,120],[225,225],[180,180],[135,135]]
+    const centDigits = [dCentA, dCentB, dCentBm, dCentAm]
+
+    // Phase 1: move all digits to d_CENT using MIN_DISTANCE (direction 6)
+    for (let i = 0; i < 4; i++)
+      setDigit(i, centDigits[i], 6, centSecs)
+
+    // Phase 2: per-clock staggered spin into target.
+    // group = max(colDist, rowDist), colDist = min(|hd-3|,|hd-4|), rowDist = |p-1|.
+    // current_state is already updated to d_CENT angles by setDigit above.
+    for (let hd = 0; hd < 8; hd++) {
+      const di   = Math.floor(hd / 2)
+      const half = hd % 2
+      const values = digits[time.charAt(di)].slice(half * 3, half * 3 + 3)
+      for (let p = 0; p < 3; p++) {
+        const colDist = Math.min(Math.abs(hd - 3), Math.abs(hd - 4))
+        const rowDist = Math.abs(p - 1)
+        const group = Math.max(colDist, rowDist)
+        const curr = current_state[di][p + half * 3]
+        const anim = anim_state[di][p + half * 3]
+        let dh, dm
+        if (hd < 4) {
+          // columns 0-3: COUNTERCLOCKWISE3 h-hand, CLOCKWISE3 m-hand
+          const d2 = calcAngleCW(curr[0], values[p][0])
+          const d3 = calcAngleCCW(curr[1], values[p][1])
+          curr[0] = (curr[0] + d2) % 360
+          curr[1] = ((curr[1] - d3) % 360 + 360) % 360
+          dh = -(d2 + 720)
+          dm = -(d3 + 720)
+        } else {
+          // columns 4-7: CLOCKWISE3 h-hand, COUNTERCLOCKWISE3 m-hand
+          const d2 = calcAngleCCW(curr[0], values[p][0])
+          const d3 = calcAngleCW(curr[1], values[p][1])
+          curr[0] = ((curr[0] - d2) % 360 + 360) % 360
+          curr[1] = (curr[1] + d3) % 360
+          dh = d2 + 720
+          dm = d3 + 720
+        }
+        const ci = hd * 3 + p
+        const delay = holdMs + group * 100
+        // Per-hand duration proportional to travel so both hands move at
+        // the same angular speed and acceleration (matches firmware).
+        const gearSpeed = (720 + 360) / spinSecs // deg per sec
+        const secH = Math.abs(dh) / gearSpeed
+        const secM = Math.abs(dm) / gearSpeed
+        setTimeout(() => {
+          anim[0] += dh
+          anim[1] -= dm
+          setHands(ci, anim[0], anim[1], secH, secM)
+        }, delay)
+      }
+    }
+  }
+
   // Last time setted on clock
   let lastTime
   
@@ -1663,6 +1732,9 @@
           break;
         case 7:
           setBubble(lastTime)
+          break;
+        case 8:
+          setGear(lastTime)
           break;
       }
     } else if (sleep[day][hours] === 1 || !clockEnabled) {
