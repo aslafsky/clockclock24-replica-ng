@@ -403,8 +403,12 @@ void set_globe()
     for (int j = 0; j < 3; j++)
     {
       // Checkerboard spin: (col + row) even -> hour CW / minute CCW;
-      // (col + row) odd -> hour CCW / minute CW.
-      if ((i + j) % 2 == 0)
+      // (col + row) odd -> hour CCW / minute CW. Even columns (0,2,4,6)
+      // have both hands' rotation direction inverted.
+      bool hour_cw = ((i + j) % 2 == 0);
+      if (i % 2 == 0)
+        hour_cw = !hour_cw;
+      if (hour_cw)
       {
         hd.clocks[j].mode_h = CLOCKWISE3;
         hd.clocks[j].mode_m = COUNTERCLOCKWISE3;
@@ -437,8 +441,12 @@ void set_bubble()
     for (int j = 0; j < 3; j++)
     {
       // Checkerboard spin: (col + row) even -> hour CW / minute CCW;
-      // (col + row) odd -> hour CCW / minute CW.
-      if ((i + j) % 2 == 0)
+      // (col + row) odd -> hour CCW / minute CW. Even columns (0,2,4,6)
+      // have both hands' rotation direction inverted.
+      bool hour_cw = ((i + j) % 2 == 0);
+      if (i % 2 == 0)
+        hour_cw = !hour_cw;
+      if (hour_cw)
       {
         hd.clocks[j].mode_h = CLOCKWISE3;
         hd.clocks[j].mode_m = COUNTERCLOCKWISE3;
