@@ -176,4 +176,56 @@ const t_digit digit_wave_b_mirror = {
 
 const t_full_clock d_WAVE = {digit_wave_a, digit_wave_b, digit_wave_b_mirror, digit_wave_a_mirror};
 
+// All hands pointing down-left (225 deg) - uniform "joint" pose
+const t_digit digit_joint = {
+  225, 225,
+  225, 225,
+  225, 225,
+  225, 225,
+  225, 225,
+  225, 225
+};
+
+const t_full_clock d_joint = {digit_joint, digit_joint, digit_joint, digit_joint};
+
+// "Centered" fan pose: hands spread around the horizontal axis
+const t_digit digit_cent_a = {
+  345, 345,
+  0, 0,
+  15, 15,
+  330, 330,
+  0, 0,
+  30, 30
+};
+
+const t_digit digit_cent_b = {
+  315, 315,
+  0, 0,
+  45, 45,
+  300, 300,
+  0, 0,
+  60, 60
+};
+
+// Left-right mirrors (columns swapped, angles reflected: theta -> 180 - theta)
+const t_digit digit_cent_a_mirror = {
+  210, 210,
+  180, 180,
+  150, 150,
+  195, 195,
+  180, 180,
+  165, 165
+};
+
+const t_digit digit_cent_b_mirror = {
+  240, 240,
+  180, 180,
+  120, 120,
+  225, 225,
+  180, 180,
+  135, 135
+};
+
+const t_full_clock d_CENT = {digit_cent_a, digit_cent_b, digit_cent_b_mirror, digit_cent_a_mirror};
+
 #endif
