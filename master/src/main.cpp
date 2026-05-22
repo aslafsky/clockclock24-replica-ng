@@ -490,8 +490,11 @@ void set_gear()
     for (int hd = 0; hd < 8; hd++)
     {
       // Columns 0-3 spin counter-clockwise, columns 4-7 spin clockwise.
-      int mode_h = (hd < 4) ? COUNTERCLOCKWISE3 : CLOCKWISE3;
-      int mode_m = (hd < 4) ? CLOCKWISE3 : COUNTERCLOCKWISE3;
+      // Both hands of each sub-clock rotate the same direction at the same
+      // speed (speed is taken from the shared globals).
+      int mode = (hd < 4) ? COUNTERCLOCKWISE3 : CLOCKWISE3;
+      int mode_h = mode;
+      int mode_m = mode;
       t_half_digitl lite = target.digit[hd / 2].halfs[hd % 2];
       for (int p = 0; p < 3; p++)
       {
