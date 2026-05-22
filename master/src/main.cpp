@@ -277,7 +277,7 @@ void set_arrow()
   _delay(5000 + (9000 - 4000) / sqrt(get_speed_multiplier()));
 
   // Phase 2: staggered propeller spin into the target time.
-  set_speed(500 * get_speed_multiplier());
+  set_speed(450 * get_speed_multiplier());
   set_acceleration(100 * get_speed_multiplier());
   set_direction(CLOCKWISE3);
 
@@ -312,7 +312,7 @@ void set_arrow()
       }
     }
     if (group_has_clock && proj < MAX_PROJ)
-      delay(100);
+      delay(50);
   }
 }
 
