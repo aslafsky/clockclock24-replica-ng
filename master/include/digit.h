@@ -186,7 +186,7 @@ const t_digit digit_JOINT = {
   225, 225
 };
 
-const t_full_clock d_joint = {digit_joint, digit_joint, digit_joint, digit_joint};
+const t_full_clock d_joint = {digit_JOINT, digit_JOINT, digit_JOINT, digit_JOINT};
 
 // "Centered" fan pose: hands spread around the horizontal axis
 const t_digit digit_cent_a = {
