@@ -1537,8 +1537,9 @@
 
   // Sets time with globe animation
   // Phase 1: all clocks move to d_bubble (MIN_DISTANCE).
-  // Phase 2: after hold, each clock spins h-hand CW + m-hand CCW (CLOCKWISE3 /
-  //          COUNTERCLOCKWISE3 = 2 extra rotations) into the target digit.
+  // Phase 2: after hold, each clock spins 2 extra rotations into the target
+  //          digit in a checkerboard pattern — (col + row) even spins the
+  //          hour hand CW / minute hand CCW, odd spins hour CCW / minute CW.
   function setGlobe(time) {
     const scaleFactor = Math.pow(speedMultiplier, 0.7)
     const bubbleSecs = 8  / scaleFactor   // Phase 1 travel time
@@ -1558,20 +1559,32 @@
       for (let p = 0; p < 3; p++) {
         const curr = current_state[di][p + half * 3]
         const anim = anim_state[di][p + half * 3]
-        // h-hand: CLOCKWISE3 (direction 2) — 2 extra full CW rotations
-        const d2 = calcAngleCCW(curr[0], values[p][0])
-        curr[0] = ((curr[0] - d2) % 360 + 360) % 360
-        const dh = d2 + 720
-        // m-hand: COUNTERCLOCKWISE3 (direction 5) — 2 extra full CCW rotations
-        const d3 = calcAngleCW(curr[1], values[p][1])
-        curr[1] = (curr[1] + d3) % 360
-        const dm = d3 + 720
+        // Checkerboard spin: (col + row) even -> hour CW / minute CCW;
+        // (col + row) odd -> hour CCW / minute CW.
+        let dh, dm
+        if ((hd + p) % 2 === 0) {
+          // h-hand CW (CLOCKWISE3), m-hand CCW (COUNTERCLOCKWISE3)
+          const d2 = calcAngleCCW(curr[0], values[p][0])
+          curr[0] = ((curr[0] - d2) % 360 + 360) % 360
+          dh = d2 + 720
+          const d3 = calcAngleCW(curr[1], values[p][1])
+          curr[1] = (curr[1] + d3) % 360
+          dm = d3 + 720
+        } else {
+          // h-hand CCW (COUNTERCLOCKWISE3), m-hand CW (CLOCKWISE3)
+          const d2 = calcAngleCW(curr[0], values[p][0])
+          curr[0] = (curr[0] + d2) % 360
+          dh = -(d2 + 720)
+          const d3 = calcAngleCCW(curr[1], values[p][1])
+          curr[1] = ((curr[1] - d3) % 360 + 360) % 360
+          dm = -(d3 + 720)
+        }
         const ci = hd * 3 + p
         // Per-hand duration proportional to travel so both hands move at
         // the same angular speed and acceleration (matches firmware).
         const globeSpeed = (720 + 360) / spinSecs // deg per sec
-        const secH = dh / globeSpeed
-        const secM = dm / globeSpeed
+        const secH = Math.abs(dh) / globeSpeed
+        const secM = Math.abs(dm) / globeSpeed
         setTimeout(() => {
           anim[0] += dh
           anim[1] -= dm
@@ -1584,8 +1597,9 @@
   // Sets time with bubble animation
   // Phase 1: all clocks move to d_cross_bubble (MIN_DISTANCE) — alternating
   //          bubble / inv_bubble poses across the 4 digits.
-  // Phase 2: after hold, each clock spins h-hand CW + m-hand CCW (CLOCKWISE3 /
-  //          COUNTERCLOCKWISE3 = 2 extra rotations) into the target digit.
+  // Phase 2: after hold, each clock spins 2 extra rotations into the target
+  //          digit in a checkerboard pattern — (col + row) even spins the
+  //          hour hand CW / minute hand CCW, odd spins hour CCW / minute CW.
   function setBubble(time) {
     const scaleFactor = Math.pow(speedMultiplier, 0.7)
     const bubbleSecs = 8  / scaleFactor   // Phase 1 travel time
@@ -1605,20 +1619,32 @@
       for (let p = 0; p < 3; p++) {
         const curr = current_state[di][p + half * 3]
         const anim = anim_state[di][p + half * 3]
-        // h-hand: CLOCKWISE3 (direction 2) — 2 extra full CW rotations
-        const d2 = calcAngleCCW(curr[0], values[p][0])
-        curr[0] = ((curr[0] - d2) % 360 + 360) % 360
-        const dh = d2 + 720
-        // m-hand: COUNTERCLOCKWISE3 (direction 5) — 2 extra full CCW rotations
-        const d3 = calcAngleCW(curr[1], values[p][1])
-        curr[1] = (curr[1] + d3) % 360
-        const dm = d3 + 720
+        // Checkerboard spin: (col + row) even -> hour CW / minute CCW;
+        // (col + row) odd -> hour CCW / minute CW.
+        let dh, dm
+        if ((hd + p) % 2 === 0) {
+          // h-hand CW (CLOCKWISE3), m-hand CCW (COUNTERCLOCKWISE3)
+          const d2 = calcAngleCCW(curr[0], values[p][0])
+          curr[0] = ((curr[0] - d2) % 360 + 360) % 360
+          dh = d2 + 720
+          const d3 = calcAngleCW(curr[1], values[p][1])
+          curr[1] = (curr[1] + d3) % 360
+          dm = d3 + 720
+        } else {
+          // h-hand CCW (COUNTERCLOCKWISE3), m-hand CW (CLOCKWISE3)
+          const d2 = calcAngleCW(curr[0], values[p][0])
+          curr[0] = (curr[0] + d2) % 360
+          dh = -(d2 + 720)
+          const d3 = calcAngleCCW(curr[1], values[p][1])
+          curr[1] = ((curr[1] - d3) % 360 + 360) % 360
+          dm = -(d3 + 720)
+        }
         const ci = hd * 3 + p
         // Per-hand duration proportional to travel so both hands move at
         // the same angular speed and acceleration (matches firmware).
         const bubbleSpeed = (720 + 360) / spinSecs // deg per sec
-        const secH = dh / bubbleSpeed
-        const secM = dm / bubbleSpeed
+        const secH = Math.abs(dh) / bubbleSpeed
+        const secM = Math.abs(dm) / bubbleSpeed
         setTimeout(() => {
           anim[0] += dh
           anim[1] -= dm

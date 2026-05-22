@@ -402,8 +402,18 @@ void set_globe()
     t_half_digit hd = get_full_half_digit(clock.digit[i/2].halfs[i%2]);
     for (int j = 0; j < 3; j++)
     {
-      hd.clocks[j].mode_h = CLOCKWISE3;
-      hd.clocks[j].mode_m = COUNTERCLOCKWISE3;
+      // Checkerboard spin: (col + row) even -> hour CW / minute CCW;
+      // (col + row) odd -> hour CCW / minute CW.
+      if ((i + j) % 2 == 0)
+      {
+        hd.clocks[j].mode_h = CLOCKWISE3;
+        hd.clocks[j].mode_m = COUNTERCLOCKWISE3;
+      }
+      else
+      {
+        hd.clocks[j].mode_h = COUNTERCLOCKWISE3;
+        hd.clocks[j].mode_m = CLOCKWISE3;
+      }
     }
     set_half_digit_full(i, hd);
   }
@@ -426,8 +436,18 @@ void set_bubble()
     t_half_digit hd = get_full_half_digit(clock.digit[i/2].halfs[i%2]);
     for (int j = 0; j < 3; j++)
     {
-      hd.clocks[j].mode_h = CLOCKWISE3;
-      hd.clocks[j].mode_m = COUNTERCLOCKWISE3;
+      // Checkerboard spin: (col + row) even -> hour CW / minute CCW;
+      // (col + row) odd -> hour CCW / minute CW.
+      if ((i + j) % 2 == 0)
+      {
+        hd.clocks[j].mode_h = CLOCKWISE3;
+        hd.clocks[j].mode_m = COUNTERCLOCKWISE3;
+      }
+      else
+      {
+        hd.clocks[j].mode_h = COUNTERCLOCKWISE3;
+        hd.clocks[j].mode_m = CLOCKWISE3;
+      }
     }
     set_half_digit_full(i, hd);
   }
