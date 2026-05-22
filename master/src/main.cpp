@@ -73,6 +73,11 @@ void set_bubble();
 void set_gear();
 
 /**
+ * Sets clock time using scatter animation
+*/
+void set_scatter();
+
+/**
  * Sets clock to stop state
 */
 void stop();
@@ -233,6 +238,9 @@ void set_time()
         break;
       case GEAR:
         set_gear();
+        break;
+      case SCATTER:
+        set_scatter();
         break;
     }
   }
@@ -464,6 +472,41 @@ void set_gear()
       }
     }
     if (g < MAX_GROUP)
+      delay(100);
+  }
+}
+
+void set_scatter()
+{
+  // All hands rotate counter-clockwise. The hour hand makes 2 extra full
+  // rotations; the minute hand spins at twice the hour hand's speed.
+  // Any hand's speed is capped at 800; acceleration is 150 for all hands.
+  int hour_speed = 400 * get_speed_multiplier();
+  int minute_speed = hour_speed * 2;
+  if (minute_speed > 800)
+  {
+    minute_speed = 800;
+    hour_speed = 400;
+  }
+  set_speed(hour_speed);
+  set_acceleration(150);
+  set_direction(COUNTERCLOCKWISE3);
+
+  t_full_clock clock = get_clock_state_from_time(last_hour, last_minute);
+
+  // Left-to-right stagger: column 0 starts first, column 7 last, 100ms apart.
+  for (int i = 0; i < 8; i++)
+  {
+    t_half_digit hd = get_full_half_digit(clock.digit[i/2].halfs[i%2]);
+    for (int j = 0; j < 3; j++)
+    {
+      hd.clocks[j].mode_h = COUNTERCLOCKWISE3;
+      hd.clocks[j].mode_m = COUNTERCLOCKWISE3;
+      // Minute hand runs at twice the hour hand's speed.
+      hd.clocks[j].speed_m = minute_speed;
+    }
+    set_half_digit_full(i, hd);
+    if (i < 7)
       delay(100);
   }
 }

@@ -25,7 +25,8 @@ enum clock_modes
   RIPPLE,
   GLOBE,
   BUBBLE,
-  GEAR
+  GEAR,
+  SCATTER
 };
 
 // Virtual mode for backward compatibility
@@ -142,7 +143,7 @@ void set_clock_mode(int value);
 void set_clock_mode_temp(int value);
 
 /**
- * Sets clock animation mode (LAZY�GEAR)
+ * Sets clock animation mode (LAZY�SCATTER)
  * @param value   mode value of type clock_modes
  */
 void set_clock_animation_mode(int value);
