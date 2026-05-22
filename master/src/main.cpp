@@ -442,9 +442,12 @@ void set_bubble()
     {
       // Checkerboard spin: (col + row) even -> hour CW / minute CCW;
       // (col + row) odd -> hour CCW / minute CW. Even columns (0,2,4,6)
-      // have both hands' rotation direction inverted.
+      // have both hands' rotation direction inverted, and columns 3 and 7
+      // are inverted as well.
       bool hour_cw = ((i + j) % 2 == 0);
       if (i % 2 == 0)
+        hour_cw = !hour_cw;
+      if (i == 3 || i == 7)
         hour_cw = !hour_cw;
       if (hour_cw)
       {
