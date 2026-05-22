@@ -58,6 +58,11 @@ void set_arrow();
 void set_ripple();
 
 /**
+ * Sets clock time using globe animation
+*/
+void set_globe();
+
+/**
  * Sets clock to stop state
 */
 void stop();
@@ -210,6 +215,9 @@ void set_time()
       case RIPPLE:
         set_ripple();
         break;
+      case GLOBE:
+        set_globe();
+        break;
     }
   }
 }
@@ -350,6 +358,30 @@ void set_ripple()
     }
     if (d < MAX_DIST)
       delay(400);
+  }
+}
+
+void set_globe()
+{
+  set_speed(800 * get_speed_multiplier());
+  set_acceleration(150 * get_speed_multiplier());
+  set_direction(MIN_DISTANCE);
+  set_clock(d_bubble);
+  _delay(4000 +(9000 - 4000) / sqrt(get_speed_multiplier()));
+  set_speed(600 * get_speed_multiplier());
+  set_acceleration(150 * get_speed_multiplier());
+  // Use CLOCKWISE3 to populate speed/accel fields via get_full_half_digit
+  set_direction(CLOCKWISE3);
+  t_full_clock clock = get_clock_state_from_time(last_hour, last_minute);
+  for (int i = 0; i < 8; i++)
+  {
+    t_half_digit hd = get_full_half_digit(clock.digit[i/2].halfs[i%2]);
+    for (int j = 0; j < 3; j++)
+    {
+      hd.clocks[j].mode_h = CLOCKWISE3;
+      hd.clocks[j].mode_m = COUNTERCLOCKWISE3;
+    }
+    set_half_digit_full(i, hd);
   }
 }
 
