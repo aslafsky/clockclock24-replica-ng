@@ -506,7 +506,7 @@ void set_gear()
       }
     }
     if (g < MAX_GROUP)
-      delay(100);
+      delay(200);
   }
 }
 
@@ -535,7 +535,7 @@ void set_scatter()
     }
     set_half_digit_full(i, hd);
     if (i < 7)
-      delay(100);
+      delay(200);
   }
 }
 
