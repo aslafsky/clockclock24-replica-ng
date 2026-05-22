@@ -283,11 +283,18 @@ void set_arrow()
 
   t_full_clock target = get_clock_state_from_time(last_hour, last_minute);
 
-  // Diagonal stagger: index = col + (2 - row), 0..9. Starts at the
-  // bottom-left clock (row 2, col 0) and ends at the top-right (row 0, col 7).
-  const int MAX_DIAG = 9; // 7 + (2 - 0)
-  for (int diag = 0; diag <= MAX_DIAG; diag++)
+  // Staggered wavefront perpendicular to the line through the centres of the
+  // top-left (row 0, col 0) and bottom-right (row 2, col 7) sub-clocks. That
+  // line has direction (7, 2) in (col, row) space, so the perpendicular is
+  // (2, -7) and a clock's projection onto it is proj = 2*col - 7*row.
+  // proj ranges from -14 at the bottom-left clock (row 2, col 0) to +14 at the
+  // top-right clock (row 0, col 7). Clocks sharing a projection spin together;
+  // successive non-empty groups are staggered 200ms apart.
+  const int MIN_PROJ = -14; // 2*0 - 7*2
+  const int MAX_PROJ = 14;  // 2*7 - 7*0
+  for (int proj = MIN_PROJ; proj <= MAX_PROJ; proj++)
   {
+    bool group_has_clock = false;
     for (int hd = 0; hd < 8; hd++)
     {
       t_half_digitl lite = target.digit[hd / 2].halfs[hd % 2];
@@ -297,11 +304,14 @@ void set_arrow()
         int row = p;
         // Each clock spins h-hand CW and m-hand CCW with 2 extra full
         // rotations (CLOCKWISE3 / COUNTERCLOCKWISE3) into the target.
-        if (col + (2 - row) == diag)
+        if (2 * col - 7 * row == proj)
+        {
           set_single_clock_full(hd, p, lite, CLOCKWISE3, COUNTERCLOCKWISE3);
+          group_has_clock = true;
+        }
       }
     }
-    if (diag < MAX_DIAG)
+    if (group_has_clock && proj < MAX_PROJ)
       delay(200);
   }
 }
