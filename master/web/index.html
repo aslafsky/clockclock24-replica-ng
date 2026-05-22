@@ -1603,7 +1603,8 @@
   // Phase 2: after hold, each clock spins 2 extra rotations into the target
   //          digit in a checkerboard pattern — (col + row) even spins the
   //          hour hand CW / minute hand CCW, odd spins hour CCW / minute CW.
-  //          Even columns (0,2,4,6) have both hands' direction inverted.
+  //          Even columns (0,2,4,6) have both hands' direction inverted, and
+  //          columns 3 and 7 are inverted as well.
   function setBubble(time) {
     const scaleFactor = Math.pow(speedMultiplier, 0.7)
     const bubbleSecs = 8  / scaleFactor   // Phase 1 travel time
@@ -1628,6 +1629,7 @@
         let dh, dm
         let hourCW = ((hd + p) % 2 === 0)
         if (hd % 2 === 0) hourCW = !hourCW
+        if (hd === 3 || hd === 7) hourCW = !hourCW
         if (hourCW) {
           // h-hand CW (CLOCKWISE3), m-hand CCW (COUNTERCLOCKWISE3)
           const d2 = calcAngleCCW(curr[0], values[p][0])
