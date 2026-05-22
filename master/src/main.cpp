@@ -512,17 +512,10 @@ void set_gear()
 
 void set_scatter()
 {
-  // All hands rotate counter-clockwise. The hour hand makes 2 extra full
-  // rotations; the minute hand spins at twice the hour hand's speed.
-  // Any hand's speed is capped at 800; acceleration is 150 for all hands.
-  int hour_speed = 400 * get_speed_multiplier();
-  int minute_speed = hour_speed * 2;
-  if (minute_speed > 800)
-  {
-    minute_speed = 800;
-    hour_speed = 400;
-  }
-  set_speed(hour_speed);
+  // All hands rotate counter-clockwise. The hour hand makes 2 full rotations
+  // at speed 400; the minute hand makes 4 full rotations at speed 800, so
+  // both hands spin for the same duration and land together.
+  set_speed(400 * get_speed_multiplier());
   set_acceleration(150);
   set_direction(COUNTERCLOCKWISE3);
 
@@ -534,10 +527,11 @@ void set_scatter()
     t_half_digit hd = get_full_half_digit(clock.digit[i/2].halfs[i%2]);
     for (int j = 0; j < 3; j++)
     {
+      // Hour hand: 2 full rotations counter-clockwise.
       hd.clocks[j].mode_h = COUNTERCLOCKWISE3;
-      hd.clocks[j].mode_m = COUNTERCLOCKWISE3;
-      // Minute hand runs at twice the hour hand's speed.
-      hd.clocks[j].speed_m = minute_speed;
+      // Minute hand: 4 full rotations counter-clockwise at speed 800.
+      hd.clocks[j].mode_m = COUNTERCLOCKWISE5;
+      hd.clocks[j].speed_m = 800 * get_speed_multiplier();
     }
     set_half_digit_full(i, hd);
     if (i < 7)

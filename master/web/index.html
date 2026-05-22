@@ -1726,13 +1726,15 @@
   }
 
   // Sets time with scatter animation
-  // All hands rotate counter-clockwise; the hour hand makes 2 extra full
-  // rotations while the minute hand spins at twice the hour hand's speed
-  // (and so finishes in half the time). Columns are staggered left-to-right,
-  // 100ms apart — column 0 starts first, column 7 last.
+  // All hands rotate counter-clockwise. The hour hand makes 2 full rotations
+  // at speed 400; the minute hand makes 4 full rotations at speed 800, so
+  // both hands spin for the same duration and land together. Columns are
+  // staggered left-to-right, 100ms apart — column 0 first, column 7 last.
   function setScatter(time) {
     const scaleFactor = Math.pow(speedMultiplier, 0.7)
-    const secs = 16 / scaleFactor // hour-hand spin duration
+    // Hand speed in degrees per second (hour 400, minute 800 -> 1x / 2x).
+    const hourSpeed   = 45 * scaleFactor
+    const minuteSpeed = 90 * scaleFactor
     for (let hd = 0; hd < 8; hd++) {
       const di   = Math.floor(hd / 2)
       const half = hd % 2
@@ -1740,20 +1742,23 @@
       for (let p = 0; p < 3; p++) {
         const curr = current_state[di][p + half * 3]
         const anim = anim_state[di][p + half * 3]
-        // Hour hand: CCW, 2 extra full rotations (COUNTERCLOCKWISE3).
+        // Hour hand: CCW, 2 full rotations.
         const d1 = calcAngleCW(curr[0], values[p][0])
         curr[0] = (curr[0] + d1) % 360
         const dh = d1 + 720
-        // Minute hand: CCW, 2 extra full rotations (COUNTERCLOCKWISE3).
+        // Minute hand: CCW, 4 full rotations.
         const d3 = calcAngleCW(curr[1], values[p][1])
         curr[1] = (curr[1] + d3) % 360
-        const dm = d3 + 720
+        const dm = d3 + 1440
         const ci = hd * 3 + p
+        // Duration per hand = travel / speed, so the minute hand runs at
+        // twice the speed for its 2x travel and finishes with the hour hand.
+        const secH = dh / hourSpeed
+        const secM = dm / minuteSpeed
         setTimeout(() => {
           anim[0] -= dh
           anim[1] -= dm
-          // Minute hand runs at twice the speed -> half the duration.
-          setHands(ci, anim[0], anim[1], secs, secs / 2)
+          setHands(ci, anim[0], anim[1], secH, secM)
         }, hd * 100)
       }
     }

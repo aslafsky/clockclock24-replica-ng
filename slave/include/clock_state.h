@@ -14,6 +14,7 @@ enum directions {
     MAX_DISTANCE,
     MAX_DISTANCE2,
     MAX_DISTANCE3,
+    COUNTERCLOCKWISE5, // counter-clockwise with 4 extra full rotations
     ADJUST_HAND
 };
 
