@@ -1408,7 +1408,9 @@
   // Each clock: hour hand spins CW, minute hand spins CCW (CLOCKWISE3 / COUNTERCLOCKWISE3 = 2 extra rotations)
   function setPropeller(time) {
     const scaleFactor = Math.pow(speedMultiplier, 0.7)
-    const secs = 14 / scaleFactor
+    // Slower than the firmware's actual wall-time so the preview reads as a
+    // realistic hand speed instead of a blur.
+    const secs = 22 / scaleFactor
     for (let hd = 0; hd < 8; hd++) {
       const di = Math.floor(hd / 2)
       const half = hd % 2
@@ -1440,7 +1442,10 @@
     const scaleFactor = Math.pow(speedMultiplier, 0.7)
     const waveSecs  = 8  / scaleFactor   // Phase 1 travel time
     const holdMs    = 8000 / scaleFactor // Phase 1 hold before spins start
-    const spinSecs  = 14 / scaleFactor   // Phase 2 spin duration
+    // Slower than the firmware's wall-time so the preview reads as a
+    // realistic hand speed; lower deg/sec also flattens the ease curve so
+    // the perceived acceleration drops.
+    const spinSecs  = 24 / scaleFactor   // Phase 2 spin duration
 
     // d_WAVE angles per digit index [0..3]: wave_a, wave_b, wave_b_mirror, wave_a_mirror
     const dWaveA = [[70,255],[85,275],[105,290],[60,250],[85,275],[110,300]]
@@ -1511,7 +1516,10 @@
     const scaleFactor = Math.pow(speedMultiplier, 0.7)
     const jointSecs = 8  / scaleFactor   // Phase 1 travel time
     const holdMs    = 8000 / scaleFactor // Phase 1 hold before spins start
-    const spinSecs  = 14 / scaleFactor   // Phase 2 spin duration
+    // Slower than the firmware's wall-time so the preview reads as a
+    // realistic hand speed (lower deg/sec also flattens the ease curve so
+    // perceived acceleration drops).
+    const spinSecs  = 18 / scaleFactor   // Phase 2 spin duration
 
     // Phase 1: move all digits to d_joint using MIN_DISTANCE (direction 6)
     for (let i = 0; i < 4; i++)
@@ -1540,21 +1548,23 @@
       for (let p = 0; p < 3; p++) {
         const curr = current_state[di][p + half * 3]
         const anim = anim_state[di][p + half * 3]
-        // h-hand: CLOCKWISE3 (direction 2) — 2 extra full CW rotations
+        // Web preview tuned for legibility: 1 extra full rotation per hand
+        // instead of the firmware's 2 (CLOCKWISE3 / COUNTERCLOCKWISE3).
+        // h-hand: CW with 1 extra full rotation
         const d2 = calcAngleCCW(curr[0], values[p][0])
         curr[0] = ((curr[0] - d2) % 360 + 360) % 360
-        const dh = d2 + 720
-        // m-hand: COUNTERCLOCKWISE3 (direction 5) — 2 extra full CCW rotations
+        const dh = d2 + 360
+        // m-hand: CCW with 1 extra full rotation
         const d3 = calcAngleCW(curr[1], values[p][1])
         curr[1] = (curr[1] + d3) % 360
-        const dm = d3 + 720
+        const dm = d3 + 360
         const ci = hd * 3 + p
         // Stagger by rank along the perpendicular wavefront (bottom-left first)
         const rank = projRank.get(projOf(hd, p))
         const delay = holdMs + rank * 200
         // Per-hand duration proportional to travel so both hands move at
-        // the same angular speed and acceleration (matches firmware).
-        const arrowSpeed = (720 + 360) / spinSecs // deg per sec
+        // the same angular speed.
+        const arrowSpeed = (360 + 180) / spinSecs // deg per sec
         const secH = dh / arrowSpeed
         const secM = dm / arrowSpeed
         animTimeout(() => {
@@ -1576,7 +1586,9 @@
     const scaleFactor = Math.pow(speedMultiplier, 0.7)
     const bubbleSecs = 8  / scaleFactor   // Phase 1 travel time
     const holdMs     = 8000 / scaleFactor // Phase 1 hold before spins start
-    const spinSecs   = 14 / scaleFactor   // Phase 2 spin duration
+    // Slower than the firmware wall-time so the preview reads as a realistic
+    // hand speed.
+    const spinSecs   = 20 / scaleFactor   // Phase 2 spin duration
 
     // Phase 1: move all digits to d_bubble using MIN_DISTANCE (direction 6)
     for (let i = 0; i < 4; i++)
@@ -1596,33 +1608,34 @@
         let dh, dm
         let hourCW = ((hd + p) % 2 === 0)
         if (hd % 2 === 0) hourCW = !hourCW
+        // Web preview tuned for legibility: 1 extra full rotation per hand
+        // (firmware still uses 2 extra via CLOCKWISE3 / COUNTERCLOCKWISE3).
         if (hourCW) {
-          // h-hand CW (CLOCKWISE3), m-hand CCW (COUNTERCLOCKWISE3)
           const d2 = calcAngleCCW(curr[0], values[p][0])
           curr[0] = ((curr[0] - d2) % 360 + 360) % 360
-          dh = d2 + 720
+          dh = d2 + 360
           const d3 = calcAngleCW(curr[1], values[p][1])
           curr[1] = (curr[1] + d3) % 360
-          dm = d3 + 720
+          dm = d3 + 360
         } else {
-          // h-hand CCW (COUNTERCLOCKWISE3), m-hand CW (CLOCKWISE3)
           const d2 = calcAngleCW(curr[0], values[p][0])
           curr[0] = (curr[0] + d2) % 360
-          dh = -(d2 + 720)
+          dh = -(d2 + 360)
           const d3 = calcAngleCCW(curr[1], values[p][1])
           curr[1] = ((curr[1] - d3) % 360 + 360) % 360
-          dm = -(d3 + 720)
+          dm = -(d3 + 360)
         }
         const ci = hd * 3 + p
-        // Per-hand duration proportional to travel so both hands move at
-        // the same angular speed and acceleration (matches firmware).
-        const globeSpeed = (720 + 360) / spinSecs // deg per sec
-        const secH = Math.abs(dh) / globeSpeed
-        const secM = Math.abs(dm) / globeSpeed
+        // Use the same duration for both hands so they finish together and
+        // visually rotate at the same effective speed/acceleration. Pick the
+        // larger of the two travels so neither hand has to exceed the
+        // animation's deg/sec budget.
+        const globeSpeed = (360 + 180) / spinSecs // deg per sec
+        const secBoth = Math.max(Math.abs(dh), Math.abs(dm)) / globeSpeed
         animTimeout(() => {
           anim[0] += dh
           anim[1] -= dm
-          setHands(ci, anim[0], anim[1], secH, secM)
+          setHands(ci, anim[0], anim[1], secBoth, secBoth)
         }, holdMs)
       }
     }
@@ -1640,7 +1653,9 @@
     const scaleFactor = Math.pow(speedMultiplier, 0.7)
     const bubbleSecs = 8  / scaleFactor   // Phase 1 travel time
     const holdMs     = 8000 / scaleFactor // Phase 1 hold before spins start
-    const spinSecs   = 14 / scaleFactor   // Phase 2 spin duration
+    // Slower than the firmware wall-time so the preview reads as a realistic
+    // hand speed.
+    const spinSecs   = 20 / scaleFactor   // Phase 2 spin duration
 
     // Phase 1: move all digits to d_cross_bubble using MIN_DISTANCE (direction 6)
     for (let i = 0; i < 4; i++)
@@ -1661,33 +1676,32 @@
         let hourCW = ((hd + p) % 2 === 0)
         if (hd % 2 === 0) hourCW = !hourCW
         if (hd === 3 || hd === 7) hourCW = !hourCW
+        // Web preview tuned for legibility: 1 extra full rotation per hand
+        // (firmware still uses 2 extra via CLOCKWISE3 / COUNTERCLOCKWISE3).
         if (hourCW) {
-          // h-hand CW (CLOCKWISE3), m-hand CCW (COUNTERCLOCKWISE3)
           const d2 = calcAngleCCW(curr[0], values[p][0])
           curr[0] = ((curr[0] - d2) % 360 + 360) % 360
-          dh = d2 + 720
+          dh = d2 + 360
           const d3 = calcAngleCW(curr[1], values[p][1])
           curr[1] = (curr[1] + d3) % 360
-          dm = d3 + 720
+          dm = d3 + 360
         } else {
-          // h-hand CCW (COUNTERCLOCKWISE3), m-hand CW (CLOCKWISE3)
           const d2 = calcAngleCW(curr[0], values[p][0])
           curr[0] = (curr[0] + d2) % 360
-          dh = -(d2 + 720)
+          dh = -(d2 + 360)
           const d3 = calcAngleCCW(curr[1], values[p][1])
           curr[1] = ((curr[1] - d3) % 360 + 360) % 360
-          dm = -(d3 + 720)
+          dm = -(d3 + 360)
         }
         const ci = hd * 3 + p
-        // Per-hand duration proportional to travel so both hands move at
-        // the same angular speed and acceleration (matches firmware).
-        const bubbleSpeed = (720 + 360) / spinSecs // deg per sec
-        const secH = Math.abs(dh) / bubbleSpeed
-        const secM = Math.abs(dm) / bubbleSpeed
+        // Use the same duration for both hands so they finish together and
+        // visually rotate at the same effective speed/acceleration.
+        const bubbleSpeed = (360 + 180) / spinSecs // deg per sec
+        const secBoth = Math.max(Math.abs(dh), Math.abs(dm)) / bubbleSpeed
         animTimeout(() => {
           anim[0] += dh
           anim[1] -= dm
-          setHands(ci, anim[0], anim[1], secH, secM)
+          setHands(ci, anim[0], anim[1], secBoth, secBoth)
         }, holdMs)
       }
     }
@@ -1703,7 +1717,9 @@
     const scaleFactor = Math.pow(speedMultiplier, 0.7)
     const centSecs = 8  / scaleFactor   // Phase 1 travel time
     const holdMs   = 8000 / scaleFactor // Phase 1 hold before spins start
-    const spinSecs = 14 / scaleFactor   // Phase 2 spin duration
+    // Slower than the firmware wall-time so the preview reads as a realistic
+    // hand speed.
+    const spinSecs = 20 / scaleFactor   // Phase 2 spin duration
 
     // d_CENT angles per digit index [0..3]: cent_a, cent_b, cent_b_mirror, cent_a_mirror
     const dCentA  = [[345,345],[0,0],[15,15],[330,330],[0,0],[30,30]]
@@ -1730,27 +1746,27 @@
         const curr = current_state[di][p + half * 3]
         const anim = anim_state[di][p + half * 3]
         // All sub-clocks spin clockwise; both hands rotate together at the
-        // same speed.
+        // same speed. Web preview tuned for legibility: 1 extra full rotation
+        // (firmware still uses 2 via CLOCKWISE3).
         let dh, dm
         {
           const d2 = calcAngleCCW(curr[0], values[p][0])
           const d3 = calcAngleCCW(curr[1], values[p][1])
           curr[0] = ((curr[0] - d2) % 360 + 360) % 360
           curr[1] = ((curr[1] - d3) % 360 + 360) % 360
-          dh = d2 + 720
-          dm = -(d3 + 720)
+          dh = d2 + 360
+          dm = -(d3 + 360)
         }
         const ci = hd * 3 + p
         const delay = holdMs + group * 100
-        // Per-hand duration proportional to travel so both hands move at
-        // the same angular speed and acceleration (matches firmware).
-        const gearSpeed = (720 + 360) / spinSecs // deg per sec
-        const secH = Math.abs(dh) / gearSpeed
-        const secM = Math.abs(dm) / gearSpeed
+        // Use the same duration for both hands so they finish together and
+        // visually rotate at the same effective speed/acceleration.
+        const gearSpeed = (360 + 180) / spinSecs // deg per sec
+        const secBoth = Math.max(Math.abs(dh), Math.abs(dm)) / gearSpeed
         animTimeout(() => {
           anim[0] += dh
           anim[1] -= dm
-          setHands(ci, anim[0], anim[1], secH, secM)
+          setHands(ci, anim[0], anim[1], secBoth, secBoth)
         }, delay)
       }
     }
@@ -1763,9 +1779,11 @@
   // staggered left-to-right, 100ms apart — column 0 first, column 7 last.
   function setScatter(time) {
     const scaleFactor = Math.pow(speedMultiplier, 0.7)
-    // Hand speed in degrees per second (hour 400, minute 800 -> 1x / 2x).
-    const hourSpeed   = 45 * scaleFactor
-    const minuteSpeed = 90 * scaleFactor
+    // Web preview tuned for legibility: slower than the firmware wall-time,
+    // preserving the 1:2 hour:minute speed ratio so the minute hand still
+    // finishes its 4 rotations alongside the hour hand's 2 rotations.
+    const hourSpeed   = 30 * scaleFactor // deg/sec
+    const minuteSpeed = 60 * scaleFactor // deg/sec
     for (let hd = 0; hd < 8; hd++) {
       const di   = Math.floor(hd / 2)
       const half = hd % 2
@@ -1790,7 +1808,7 @@
           anim[0] -= dh
           anim[1] -= dm
           setHands(ci, anim[0], anim[1], secH, secM)
-        }, hd * 100)
+        }, hd * 150) // column stagger (left -> right)
       }
     }
   }
