@@ -393,6 +393,9 @@
 
   // Current selected animation mode
   let selectedMode = 0
+  // Animation mode names. Indices match the firmware's clock_modes enum.
+  // CYCLE must stay last; setCycle() uses its index as the cycle range bound.
+  const modes = ["LAZY", "FUN", "WAVES", "PROPELLER", "ARROW", "RIPPLE", "GLOBE", "BUBBLE", "GEAR", "SCATTER", "CYCLE"]
   // Current clock enabled state
   let clockEnabled = true
   // Current selected mode
@@ -421,13 +424,16 @@
     return `<div id="clock-${index}" class="clock-box hidden"><svg class="clock clock--${index}" width="100" height="100" viewBox="0 0 100 100" onclick="selectClock(${index})"><path class="clock-smallHand" d="M50,47 C48.3431458,47 47,48.3431458 47,50 C47,51.6568542 48.3431458,53 50,53 L95,53 L95,47 L50,47 Z" stroke="none" fill="#FFF" fill-rule="evenodd"></path><path class="clock-largeHand" d="M50,47 C48.3431458,47 47,48.3431458 47,50 C47,51.6568542 48.3431458,53 50,53 L100,53 L100,47 L50,47 Z" stroke="none" fill="#FFF" fill-rule="evenodd"></path></svg><div class="btn-clock btn-clock-tl" onclick="adjustHand(${index}, 0, 1)">H-</div><div class="btn-clock btn-clock-tr" onclick="adjustHand(${index}, 1, 0)">M-</div><div class="btn-clock btn-clock-bl" onclick="adjustHand(${index}, 0, -1)">H+</div><div class="btn-clock btn-clock-br" onclick="adjustHand(${index}, -1, 0)">M+</div></div>`
   }
 
-  // Makes modes buttons 
+  // Makes modes buttons
   function genModes() {
-    let modes = ["LAZY", "FUN", "WAVES", "PROPELLER", "ARROW", "RIPPLE", "GLOBE", "BUBBLE", "GEAR", "SCATTER"]
     let html = `<div id="clock-enabled" class="btn ${clockEnabled ? "active" : ""}" style="width: 100px; margin-bottom: 16px;" onclick="toggleClockEnabled()">${clockEnabled ? "ON" : "OFF"}</div>`
     let i = 0
-    for (let m of modes)
+    for (let m of modes) {
+      // Drop the CYCLE button onto its own row below the other animations.
+      if (m === "CYCLE")
+        html += `<div style="clear:both"></div>`
       html += `<div id="mode-${i}" class="btn ${i === selectedMode ? "active" : ""}" onclick="selectMode(${i++})">${m}</div>`
+    }
     document.getElementById("modes").innerHTML = html
   }
 
@@ -1767,6 +1773,37 @@
   // Last time setted on clock
   let lastTime
   
+  // Dispatches to the set<Mode>() function for the given mode index.
+  // Used by both setTime() and setCycle(). When adding a new animation mode,
+  // add a case here and CYCLE picks it up automatically.
+  function dispatchAnimation(mode, time) {
+    switch(mode) {
+      case 0:  setLazy(time);      break;
+      case 1:  setFun(time);       break;
+      case 2:  setWaves(time);     break;
+      case 3:  setPropeller(time); break;
+      case 4:  setArrow(time);     break;
+      case 5:  setRipple(time);    break;
+      case 6:  setGlobe(time);     break;
+      case 7:  setBubble(time);    break;
+      case 8:  setGear(time);      break;
+      case 9:  setScatter(time);   break;
+      case 10: setCycle(time);     break;
+    }
+  }
+
+  // Round-robins through every animation except LAZY and CYCLE itself.
+  // The cycle range is derived from the modes[] array, so any new animation
+  // inserted between FUN and CYCLE is included automatically.
+  function setCycle(time) {
+    if (typeof setCycle.index === "undefined") setCycle.index = 0
+    const cycleIdx = modes.indexOf("CYCLE")
+    const span = cycleIdx - 1  // indices 1 (FUN) .. cycleIdx-1
+    const target = 1 + (setCycle.index % span)
+    setCycle.index++
+    dispatchAnimation(target, time)
+  }
+
   // Sets current time on clock
   function setTime() {
     const d = new Date();
@@ -1775,38 +1812,7 @@
     const hours = d.getHours()
     if (time !== lastTime && sleep[day][hours] === 0 && clockEnabled) {
       lastTime = time
-      switch(selectedMode) {
-        case 0:
-          setLazy(lastTime)
-          break;
-        case 1:
-          setFun(lastTime)
-          break;
-        case 2:
-          setWaves(lastTime)
-          break;
-        case 3:
-          setPropeller(lastTime)
-          break;
-        case 4:
-          setArrow(lastTime)
-          break;
-        case 5:
-          setRipple(lastTime)
-          break;
-        case 6:
-          setGlobe(lastTime)
-          break;
-        case 7:
-          setBubble(lastTime)
-          break;
-        case 8:
-          setGear(lastTime)
-          break;
-        case 9:
-          setScatter(lastTime)
-          break;
-      }
+      dispatchAnimation(selectedMode, lastTime)
     } else if (sleep[day][hours] === 1 || !clockEnabled) {
       setStop()
     }

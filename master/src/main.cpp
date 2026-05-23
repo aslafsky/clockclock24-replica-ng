@@ -78,6 +78,19 @@ void set_gear();
 void set_scatter();
 
 /**
+ * Sets clock time using cycle animation (round-robin through every other
+ * animation except LAZY).
+*/
+void set_cycle();
+
+/**
+ * Dispatches to the set_<mode>() function for the given clock mode. Used by
+ * both set_time() and set_cycle(). When adding a new animation mode, add a
+ * case here and the cycle mode picks it up automatically.
+*/
+void dispatch_animation(int mode);
+
+/**
  * Sets clock to stop state
 */
 void stop();
@@ -210,39 +223,47 @@ void set_time()
     is_stopped = false;
     last_hour = hour();
     last_minute = minute();
-    switch(get_clock_mode())
-    {
-      case LAZY:
-        set_lazy();
-        break;
-      case FUN:
-        set_fun();
-        break;
-      case WAVES:
-        set_waves();
-        break;
-      case PROPELLER:
-        set_propeller();
-        break;
-      case ARROW:
-        set_arrow();
-        break;
-      case RIPPLE:
-        set_ripple();
-        break;
-      case GLOBE:
-        set_globe();
-        break;
-      case BUBBLE:
-        set_bubble();
-        break;
-      case GEAR:
-        set_gear();
-        break;
-      case SCATTER:
-        set_scatter();
-        break;
-    }
+    dispatch_animation(get_clock_mode());
+  }
+}
+
+void dispatch_animation(int mode)
+{
+  switch(mode)
+  {
+    case LAZY:
+      set_lazy();
+      break;
+    case FUN:
+      set_fun();
+      break;
+    case WAVES:
+      set_waves();
+      break;
+    case PROPELLER:
+      set_propeller();
+      break;
+    case ARROW:
+      set_arrow();
+      break;
+    case RIPPLE:
+      set_ripple();
+      break;
+    case GLOBE:
+      set_globe();
+      break;
+    case BUBBLE:
+      set_bubble();
+      break;
+    case GEAR:
+      set_gear();
+      break;
+    case SCATTER:
+      set_scatter();
+      break;
+    case CYCLE:
+      set_cycle();
+      break;
   }
 }
 
@@ -537,6 +558,19 @@ void set_scatter()
     if (i < 7)
       delay(200);
   }
+}
+
+void set_cycle()
+{
+  // Round-robin through every animation from FUN through the mode just
+  // before CYCLE (LAZY is excluded). Picking up new animations added later
+  // is automatic: any new mode inserted after FUN and before CYCLE grows
+  // the cycle range, and dispatch_animation() handles routing.
+  static int cycle_index = 0;
+  int span = CYCLE - FUN;
+  int mode = FUN + (cycle_index % span);
+  cycle_index++;
+  dispatch_animation(mode);
 }
 
 void stop()
