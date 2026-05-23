@@ -527,7 +527,7 @@ void set_gear()
       }
     }
     if (g < MAX_GROUP)
-      delay(600);
+      delay(500);
   }
 }
 
