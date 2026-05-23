@@ -424,11 +424,12 @@ void set_globe()
     for (int j = 0; j < 3; j++)
     {
       // Checkerboard spin: (col + row) even -> hour CW / minute CCW;
-      // (col + row) odd -> hour CCW / minute CW. Sub-clocks in columns 3, 6
-      // and 7 have their hour and minute hand rotation direction inverted;
-      // all other columns keep the checkerboard direction.
+      // (col + row) odd -> hour CCW / minute CW. Sub-clocks in the inner
+      // four columns (2, 3, 4, 5) have their hour and minute hand rotation
+      // direction inverted; the outer columns keep the checkerboard
+      // direction.
       bool hour_cw = ((i + j) % 2 == 0);
-      if (i == 3 || i == 6 || i == 7)
+      if (i >= 2 && i <= 5)
         hour_cw = !hour_cw;
       if (hour_cw)
       {
