@@ -237,17 +237,44 @@ const t_digit digit_bubble = {
   180, 270
 };
 
-const t_digit digit_inv_bubble = {
+const t_digit digit_globe_a = {
+  180, 90,
+  180, 270,
+  180, 90,
   0, 90,
   0, 270,
-  0, 90,
+  0, 90
+};
+
+const t_digit digit_globe_b = {
+  0, 180,
+  0, 180,
+  0, 180,
   180, 90,
   180, 270,
   180, 90
 };
 
+const t_digit digit_globe_a_mirror = {
+  180, 90,
+  180, 270,
+  180, 90,
+  0, 90,
+  0, 270,
+  0, 90
+};
+
+const t_digit digit_globe_b_mirror = {
+  0, 90,
+  0, 270,
+  0, 90,
+  180, 0,
+  180, 0,
+  180, 0
+};
+
 const t_full_clock d_bubble = {digit_bubble, digit_bubble, digit_bubble, digit_bubble};
 
-const t_full_clock d_cross_bubble = {digit_bubble, digit_inv_bubble, digit_bubble, digit_inv_bubble};
+const t_full_clock d_globe = {digit_globe_a, digit_globe_b, digit_globe_b_mirror, digit_globe_a_mirror};
 
 #endif
