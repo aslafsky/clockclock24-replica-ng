@@ -1347,22 +1347,33 @@
 
   // Sets stop position
   function setStop() {
-    // Force both current_state and anim_state to the stop-pose angle (270),
+    // Force both current_state and anim_state to the stop-pose values,
     // dropping any drift accumulated by in-flight animations. Going through
-    // setHalfDigit would no-op when curr already happens to equal 270 (e.g.
+    // setHalfDigit would no-op when curr already happened to equal 270 (e.g.
     // because an animation pre-mutated curr to its target during its
     // synchronous scheduling pass), leaving the CSS stuck on the previous
     // animation's last frame.
+    //
+    // Convention in this codebase: curr is the logical angle measured CCW
+    // (270 = 6 o'clock = hands down); anim is the CSS rotation (CW), so the
+    // matching stop-pose CSS angle is 90 (mod 360). We pick the multiple of
+    // 360 around 90 closest to anim's prior value so the CSS transition is
+    // short and we don't accidentally spin extra turns to land on "down".
     const secs = 15 / Math.pow(speedMultiplier, 0.7)
+    const nearestStop = a => 90 + 360 * Math.round((a - 90) / 360)
     for (let di = 0; di < 4; di++) {
       for (let i = 0; i < 6; i++) {
         current_state[di][i][0] = 270
         current_state[di][i][1] = 270
-        anim_state[di][i][0] = 270
-        anim_state[di][i][1] = 270
+        anim_state[di][i][0] = nearestStop(anim_state[di][i][0])
+        anim_state[di][i][1] = nearestStop(anim_state[di][i][1])
       }
     }
-    for (let ci = 0; ci < 24; ci++) setHands(ci, 270, 270, secs)
+    for (let ci = 0; ci < 24; ci++) {
+      const di = Math.floor(ci / 6)
+      const i = ci % 6
+      setHands(ci, anim_state[di][i][0], anim_state[di][i][1], secs)
+    }
   }
 
   // Sets time with lazy animation
