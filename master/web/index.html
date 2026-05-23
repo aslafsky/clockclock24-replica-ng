@@ -1347,8 +1347,22 @@
 
   // Sets stop position
   function setStop() {
-    for (let i = 0; i < 4; i++)
-      setDigit(i, digit_stop, 6, 15 / Math.pow(speedMultiplier, 0.7))
+    // Force both current_state and anim_state to the stop-pose angle (270),
+    // dropping any drift accumulated by in-flight animations. Going through
+    // setHalfDigit would no-op when curr already happens to equal 270 (e.g.
+    // because an animation pre-mutated curr to its target during its
+    // synchronous scheduling pass), leaving the CSS stuck on the previous
+    // animation's last frame.
+    const secs = 15 / Math.pow(speedMultiplier, 0.7)
+    for (let di = 0; di < 4; di++) {
+      for (let i = 0; i < 6; i++) {
+        current_state[di][i][0] = 270
+        current_state[di][i][1] = 270
+        anim_state[di][i][0] = 270
+        anim_state[di][i][1] = 270
+      }
+    }
+    for (let ci = 0; ci < 24; ci++) setHands(ci, 270, 270, secs)
   }
 
   // Sets time with lazy animation
@@ -1369,12 +1383,12 @@
     for (let i = 0; i < 4; i++)
       setDigit(i, digit_II, 6, 8 / scaleFactor)
     for (let i = 0; i < 8; i++)
-      setTimeout(()=>{
+      animTimeout(()=>{
         setHalfDigit(i, digit_II, 1, 18 / scaleFactor)
       }, (7000 + 400 * (i + 1)) / scaleFactor)
 
     for (let i = 0; i < 4; i++)
-      setTimeout(()=>{
+      animTimeout(()=>{
         setDigit(i, digits[time.charAt(i)], 0, 15 / scaleFactor)
       }, (7000 + 9000 + 400 *(i*2 + 1)) / scaleFactor)
   }
@@ -1467,7 +1481,7 @@
           const waveSpeed = (720 + 360) / spinSecs // deg per sec
           const secH = Math.abs(dh) / waveSpeed
           const secM = Math.abs(dm) / waveSpeed
-          setTimeout(() => {
+          animTimeout(() => {
             anim[0] += dh
             anim[1] -= dm
             setHands(ci, anim[0], anim[1], secH, secM)
@@ -1532,7 +1546,7 @@
         const arrowSpeed = (720 + 360) / spinSecs // deg per sec
         const secH = dh / arrowSpeed
         const secM = dm / arrowSpeed
-        setTimeout(() => {
+        animTimeout(() => {
           anim[0] += dh
           anim[1] -= dm
           setHands(ci, anim[0], anim[1], secH, secM)
@@ -1594,7 +1608,7 @@
         const globeSpeed = (720 + 360) / spinSecs // deg per sec
         const secH = Math.abs(dh) / globeSpeed
         const secM = Math.abs(dm) / globeSpeed
-        setTimeout(() => {
+        animTimeout(() => {
           anim[0] += dh
           anim[1] -= dm
           setHands(ci, anim[0], anim[1], secH, secM)
@@ -1659,7 +1673,7 @@
         const bubbleSpeed = (720 + 360) / spinSecs // deg per sec
         const secH = Math.abs(dh) / bubbleSpeed
         const secM = Math.abs(dm) / bubbleSpeed
-        setTimeout(() => {
+        animTimeout(() => {
           anim[0] += dh
           anim[1] -= dm
           setHands(ci, anim[0], anim[1], secH, secM)
@@ -1722,7 +1736,7 @@
         const gearSpeed = (720 + 360) / spinSecs // deg per sec
         const secH = Math.abs(dh) / gearSpeed
         const secM = Math.abs(dm) / gearSpeed
-        setTimeout(() => {
+        animTimeout(() => {
           anim[0] += dh
           anim[1] -= dm
           setHands(ci, anim[0], anim[1], secH, secM)
@@ -1761,7 +1775,7 @@
         // twice the speed for its 2x travel and finishes with the hour hand.
         const secH = dh / hourSpeed
         const secM = dm / minuteSpeed
-        setTimeout(() => {
+        animTimeout(() => {
           anim[0] -= dh
           anim[1] -= dm
           setHands(ci, anim[0], anim[1], secH, secM)
@@ -1772,11 +1786,29 @@
 
   // Last time setted on clock
   let lastTime
-  
+
+  // Monotonic counter bumped at every new dispatch (and on stop). Animations
+  // that schedule deferred work with animTimeout() capture the current epoch
+  // and bail at fire time if it has changed — otherwise pending setTimeouts
+  // from a previous animation (or from before the clock was disabled) would
+  // mutate anim_state and override the current visual state.
+  let animEpoch = 0
+
+  // Drop-in setTimeout replacement for use inside animation functions. The
+  // wrapped callback is skipped if the animation epoch has advanced.
+  function animTimeout(fn, delay) {
+    const myEpoch = animEpoch
+    return setTimeout(() => {
+      if (myEpoch !== animEpoch) return
+      fn()
+    }, delay)
+  }
+
   // Dispatches to the set<Mode>() function for the given mode index.
   // Used by both setTime() and setCycle(). When adding a new animation mode,
   // add a case here and CYCLE picks it up automatically.
   function dispatchAnimation(mode, time) {
+    animEpoch++
     switch(mode) {
       case 0:  setLazy(time);      break;
       case 1:  setFun(time);       break;
@@ -1828,10 +1860,13 @@
     }
   }
 
-  // Clears interval and set the clock on stop position
+  // Clears interval and sets the clock on stop position.
+  // Bumps animEpoch so any in-flight animTimeout() callbacks bail out
+  // instead of mutating anim_state and overriding the stop pose.
   function stopClock() {
     clearInterval(clockInterval)
     clockInterval = undefined
+    animEpoch++
     setTimeout(setStop, 100 / Math.pow(speedMultiplier, 0.7))
   }
 
