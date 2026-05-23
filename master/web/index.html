@@ -1520,15 +1520,16 @@
           }
           const ci = hd * 3 + p
           const delay = holdMs + d * 100
-          // Per-hand duration proportional to travel so both hands move at
-          // the same angular speed and acceleration (matches firmware).
+          // Per-hand duration proportional to travel so both hands hold the
+          // same constant deg/sec, paired with 'linear' timing so neither
+          // hand ramps up or down -> matching speed AND acceleration.
           const waveSpeed = (720 + 360) / spinSecs // deg per sec
           const secH = Math.abs(dh) / waveSpeed
           const secM = Math.abs(dm) / waveSpeed
           animTimeout(() => {
             anim[0] += dh
             anim[1] -= dm
-            setHands(ci, anim[0], anim[1], secH, secM)
+            setHands(ci, anim[0], anim[1], secH, secM, 'linear')
           }, delay)
         }
       }
@@ -1589,7 +1590,7 @@
         const ci = hd * 3 + p
         // Stagger by rank along the perpendicular wavefront (bottom-left first)
         const rank = projRank.get(projOf(hd, p))
-        const delay = holdMs + rank * 200
+        const delay = holdMs + rank * 50
         // Per-hand duration proportional to travel so both hands move at
         // the same angular speed.
         const arrowSpeed = (360 + 180) / spinSecs // deg per sec
@@ -1726,16 +1727,16 @@
           dm = -(d3 + 360)
         }
         const ci = hd * 3 + p
-        // Use the same duration for both hands so they finish together and
-        // visually rotate at the same effective speed/acceleration. Pick the
-        // larger of the two travels so neither hand has to exceed the
-        // animation's deg/sec budget.
+        // Per-hand duration proportional to travel so both hands hold the
+        // same constant deg/sec, paired with 'linear' timing so neither
+        // hand ramps up or down -> matching speed AND acceleration.
         const bubbleSpeed = (360 + 180) / spinSecs // deg per sec
-        const secBoth = Math.max(Math.abs(dh), Math.abs(dm)) / bubbleSpeed
+        const secH = Math.abs(dh) / bubbleSpeed
+        const secM = Math.abs(dm) / bubbleSpeed
         animTimeout(() => {
           anim[0] += dh
           anim[1] -= dm
-          setHands(ci, anim[0], anim[1], secBoth, secBoth)
+          setHands(ci, anim[0], anim[1], secH, secM, 'linear')
         }, holdMs)
       }
     }
@@ -1793,14 +1794,16 @@
         }
         const ci = hd * 3 + p
         const delay = holdMs + group * 100
-        // Use the same duration for both hands so they finish together and
-        // visually rotate at the same effective speed/acceleration.
+        // Per-hand duration proportional to travel so both hands hold the
+        // same constant deg/sec, paired with 'linear' timing so neither
+        // hand ramps up or down -> matching speed AND acceleration.
         const gearSpeed = (360 + 180) / spinSecs // deg per sec
-        const secBoth = Math.max(Math.abs(dh), Math.abs(dm)) / gearSpeed
+        const secH = Math.abs(dh) / gearSpeed
+        const secM = Math.abs(dm) / gearSpeed
         animTimeout(() => {
           anim[0] += dh
           anim[1] -= dm
-          setHands(ci, anim[0], anim[1], secBoth, secBoth)
+          setHands(ci, anim[0], anim[1], secH, secM, 'linear')
         }, delay)
       }
     }
