@@ -79,12 +79,12 @@
 
     .clock-smallHand {
       transform: rotateZ(var(--small-hand));
-      transition: transform var(--animation-time-small, var(--animation-time)) ease;
+      transition: transform var(--animation-time-small, var(--animation-time)) var(--timing, ease);
     }
 
     .clock-largeHand {
       transform: rotateZ(var(--large-hand));
-      transition: transform var(--animation-time-large, var(--animation-time)) ease;
+      transition: transform var(--animation-time-large, var(--animation-time)) var(--timing, ease);
     }
     
     .hidden .btn-clock {
@@ -1266,13 +1266,14 @@
   let current_state = Array(4).fill().map(() => Array(6).fill().map(()=> [270, 270]))
 
   // Sets hand[id] to specified angles
-  function setHands(id, h, m, sec, secM = sec) {
+  function setHands(id, h, m, sec, secM = sec, timing = 'ease') {
     const clock = document.querySelector(`.clock--${id}`)
     clock.style.setProperty(`--small-hand`, `${h}deg`)
     clock.style.setProperty(`--large-hand`, `${m}deg`)
     clock.style.setProperty(`--animation-time`, `${sec}s`)
     clock.style.setProperty(`--animation-time-small`, `${sec}s`)
     clock.style.setProperty(`--animation-time-large`, `${secM}s`)
+    clock.style.setProperty(`--timing`, timing)
   }
 
   // Calculates the difference angle in counter clockwise direction
@@ -1610,7 +1611,11 @@
   //          digit in a checkerboard pattern — (col + row) even spins the
   //          hour hand CW / minute hand CCW, odd spins hour CCW / minute CW.
   //          Even columns (0,2,4,6) have both hands' direction inverted, and
-  //          columns 3 and 7 are inverted as well.
+  //          columns 0 and 7 are inverted as well.
+  // Uses per-hand duration = travel / speed (so both hands hold the same
+  // constant deg/sec) plus linear timing (so both have zero acceleration);
+  // together that makes every hand of every sub-clock move at the same
+  // speed and acceleration throughout the spin.
   function setGlobe(time) {
     const scaleFactor = Math.pow(speedMultiplier, 0.7)
     const bubbleSecs = 8  / scaleFactor   // Phase 1 travel time
@@ -1637,7 +1642,7 @@
         let dh, dm
         let hourCW = ((hd + p) % 2 === 0)
         if (hd % 2 === 0) hourCW = !hourCW
-        if (hd === 3 || hd === 7) hourCW = !hourCW
+        if (hd === 0 || hd === 7) hourCW = !hourCW
         // Web preview tuned for legibility: 1 extra full rotation per hand
         // (firmware still uses 2 extra via CLOCKWISE3 / COUNTERCLOCKWISE3).
         if (hourCW) {
@@ -1656,14 +1661,16 @@
           dm = -(d3 + 360)
         }
         const ci = hd * 3 + p
-        // Use the same duration for both hands so they finish together and
-        // visually rotate at the same effective speed/acceleration.
+        // Per-hand duration proportional to travel so both hands hold the
+        // same constant deg/sec, paired with 'linear' timing so neither
+        // hand ramps up or down -> matching speed AND acceleration.
         const globeSpeed = (360 + 180) / spinSecs // deg per sec
-        const secBoth = Math.max(Math.abs(dh), Math.abs(dm)) / globeSpeed
+        const secH = Math.abs(dh) / globeSpeed
+        const secM = Math.abs(dm) / globeSpeed
         animTimeout(() => {
           anim[0] += dh
           anim[1] -= dm
-          setHands(ci, anim[0], anim[1], secBoth, secBoth)
+          setHands(ci, anim[0], anim[1], secH, secM, 'linear')
         }, holdMs)
       }
     }
