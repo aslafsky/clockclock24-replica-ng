@@ -1610,9 +1610,9 @@
   // Phase 2: after hold, each clock spins 2 extra rotations into the target
   //          digit in a checkerboard pattern — (col + row) even spins the
   //          hour hand CW / minute hand CCW, odd spins hour CCW / minute CW.
-  //          Sub-clocks in columns 3, 6 and 7 have their hour and minute
-  //          hand rotation direction inverted; all other columns keep the
-  //          checkerboard direction.
+  //          Sub-clocks in the inner four columns (2, 3, 4, 5) have their
+  //          hour and minute hand rotation direction inverted; the outer
+  //          columns keep the checkerboard direction.
   // Uses per-hand duration = travel / speed (so both hands hold the same
   // constant deg/sec) plus linear timing (so both have zero acceleration);
   // together that makes every hand of every sub-clock move at the same
@@ -1642,7 +1642,7 @@
         // (col + row) odd -> hour CCW / minute CW.
         let dh, dm
         let hourCW = ((hd + p) % 2 === 0)
-        if (hd === 3 || hd === 6 || hd === 7) hourCW = !hourCW
+        if (hd >= 2 && hd <= 5) hourCW = !hourCW
         // Web preview tuned for legibility: 1 extra full rotation per hand
         // (firmware still uses 2 extra via CLOCKWISE3 / COUNTERCLOCKWISE3).
         if (hourCW) {
