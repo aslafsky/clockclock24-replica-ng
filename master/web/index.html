@@ -1590,7 +1590,7 @@
         const ci = hd * 3 + p
         // Stagger by rank along the perpendicular wavefront (bottom-left first)
         const rank = projRank.get(projOf(hd, p))
-        const delay = holdMs + rank * 50
+        const delay = holdMs + rank * 25
         // Per-hand duration proportional to travel so both hands move at
         // the same angular speed.
         const arrowSpeed = (360 + 180) / spinSecs // deg per sec
