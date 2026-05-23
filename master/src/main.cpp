@@ -365,7 +365,7 @@ void set_arrow()
       }
     }
     if (group_has_clock && proj < MAX_PROJ)
-      delay(50);
+      delay(25);
   }
 }
 
