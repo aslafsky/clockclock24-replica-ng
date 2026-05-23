@@ -331,7 +331,7 @@ void set_arrow()
 
   // Phase 2: staggered propeller spin into the target time.
   set_speed(450 * get_speed_multiplier());
-  set_acceleration(100 * get_speed_multiplier());
+  set_acceleration(150 * get_speed_multiplier());
   set_direction(CLOCKWISE3);
 
   t_full_clock target = get_clock_state_from_time(last_hour, last_minute);
@@ -527,7 +527,7 @@ void set_gear()
       }
     }
     if (g < MAX_GROUP)
-      delay(400);
+      delay(350);
   }
 }
 
