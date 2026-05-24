@@ -429,8 +429,8 @@
     let html = `<div id="clock-enabled" class="btn ${clockEnabled ? "active" : ""}" style="width: 100px; margin-bottom: 16px;" onclick="toggleClockEnabled()">${clockEnabled ? "ON" : "OFF"}</div>`
     let i = 0
     for (let m of modes) {
-      // Drop the CYCLE button onto its own row below the other animations.
-      if (m === "CYCLE")
+      // Drop DIAGONAL and CYCLE onto a second row below the main animations.
+      if (m === "DIAGONAL")
         html += `<div style="clear:both"></div>`
       html += `<div id="mode-${i}" class="btn ${i === selectedMode ? "active" : ""}" onclick="selectMode(${i++})">${m}</div>`
     }
@@ -1906,38 +1906,60 @@
   //          shows hands at 225 / 45 deg.
   // Phase 2: after a hold, each half-digit (left to right) is moved to the
   //          target time with CLOCKWISE2 (one extra full rotation), staggered.
+  //          Both hands of every sub-clock spin in the same direction (CW)
+  //          and at the same constant deg/sec with 'linear' timing, giving
+  //          matching speed and acceleration throughout the spin.
   function setDiagonal(time) {
     const scaleFactor = Math.pow(speedMultiplier, 0.7)
     const diagSecs = 8  / scaleFactor   // Phase 1 travel time
     const holdMs   = 7000 / scaleFactor // hold before per-half-digit moves
     const stepSecs = 16 / scaleFactor   // each half-digit's spin duration
     const stepMs   = 300 / scaleFactor  // gap between successive half-digits
+    const diagSpeed = (360 + 180) / stepSecs // deg per sec (avg travel / dur)
 
     // Phase 1: move every digit to d_diagonal using MIN_DISTANCE (direction 6)
     for (let i = 0; i < 4; i++)
       setDigit(i, digit_diag, 6, diagSecs)
 
-    // Phase 2: per-half-digit move into the target digit using CLOCKWISE2.
+    // Phase 2: per-clock CLOCKWISE2 (1 extra full rotation) into target.
     for (let i = 0; i < 8; i++) {
       const di   = Math.floor(i / 2)
       const half = i % 2
       const values = digits[time.charAt(di)].slice(half * 3, half * 3 + 3)
       animTimeout(() => {
-        setHalfDigit(i, values, 1, stepSecs)
+        for (let p = 0; p < 3; p++) {
+          const curr = current_state[di][p + half * 3]
+          const anim = anim_state[di][p + half * 3]
+          // CLOCKWISE2: shortest CW path + 1 extra full rotation, same
+          // formula for both hands (-> same direction, same per-sec speed).
+          const d2 = calcAngleCCW(curr[0], values[p][0])
+          const d4 = calcAngleCCW(curr[1], values[p][1])
+          curr[0] = ((curr[0] - d2) % 360 + 360) % 360
+          curr[1] = ((curr[1] - d4) % 360 + 360) % 360
+          const dh = d2 + 360
+          const dm = d4 + 360
+          anim[0] += dh
+          anim[1] += dm
+          const secH = dh / diagSpeed
+          const secM = dm / diagSpeed
+          setHands(i * 3 + p, anim[0], anim[1], secH, secM, 'linear')
+        }
       }, holdMs + stepMs * i)
     }
   }
 
-  // Round-robins through every animation except LAZY and CYCLE itself.
-  // The cycle range is derived from the modes[] array, so any new animation
-  // inserted between FUN and CYCLE is included automatically.
+  // Round-robins through every animation in a user-specified order (LAZY
+  // is excluded). When a new animation mode is added in the future, append
+  // it to cycleOrder below so the cycle picks it up.
+  const cycleOrder = [
+    'FUN', 'GLOBE', 'WAVES', 'ARROW', 'SCATTER',
+    'RIPPLE', 'BUBBLE', 'PROPELLER', 'DIAGONAL', 'GEAR',
+  ]
   function setCycle(time) {
     if (typeof setCycle.index === "undefined") setCycle.index = 0
-    const cycleIdx = modes.indexOf("CYCLE")
-    const span = cycleIdx - 1  // indices 1 (FUN) .. cycleIdx-1
-    const target = 1 + (setCycle.index % span)
+    const name = cycleOrder[setCycle.index % cycleOrder.length]
     setCycle.index++
-    dispatchAnimation(target, time)
+    dispatchAnimation(modes.indexOf(name), time)
   }
 
   // Sets current time on clock

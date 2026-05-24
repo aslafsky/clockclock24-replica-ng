@@ -587,13 +587,15 @@ void set_diagonal()
 
 void set_cycle()
 {
-  // Round-robin through every animation from FUN through the mode just
-  // before CYCLE (LAZY is excluded). Picking up new animations added later
-  // is automatic: any new mode inserted after FUN and before CYCLE grows
-  // the cycle range, and dispatch_animation() handles routing.
+  // Round-robin through every animation in a user-specified order (LAZY is
+  // excluded). When a new animation mode is added in the future, append it
+  // to this list so the cycle picks it up.
+  static const int cycle_order[] = {
+    FUN, GLOBE, WAVES, ARROW, SCATTER, RIPPLE, BUBBLE, PROPELLER, DIAGONAL, GEAR
+  };
+  static const int cycle_count = sizeof(cycle_order) / sizeof(cycle_order[0]);
   static int cycle_index = 0;
-  int span = CYCLE - FUN;
-  int mode = FUN + (cycle_index % span);
+  int mode = cycle_order[cycle_index % cycle_count];
   cycle_index++;
   dispatch_animation(mode);
 }
