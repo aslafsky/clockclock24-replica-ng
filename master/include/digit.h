@@ -277,4 +277,15 @@ const t_full_clock d_bubble = {digit_bubble, digit_bubble, digit_bubble, digit_b
 
 const t_full_clock d_globe = {digit_globe_a, digit_globe_b, digit_globe_b_mirror, digit_globe_a_mirror};
 
+const t_digit digit_diag = {
+  225, 45,
+  225, 45,
+  225, 45,
+  225, 45,
+  225, 45,
+  225, 45
+};
+
+const t_full_clock d_diagonal = {digit_diag, digit_diag, digit_diag, digit_diag};
+
 #endif
