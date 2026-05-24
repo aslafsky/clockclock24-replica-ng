@@ -201,6 +201,11 @@ void mqtt_callback(char *topic, byte *payload, unsigned int length)
                     set_clock_animation_mode(SCATTER);
                     _state_update_pending = true;
                 }
+                else if (mode_value == "DIAGONAL")
+                {
+                    set_clock_animation_mode(DIAGONAL);
+                    _state_update_pending = true;
+                }
                 else if (mode_value == "CYCLE")
                 {
                     set_clock_animation_mode(CYCLE);
@@ -275,7 +280,7 @@ void publish_discovery_select()
     payload += "\"value_template\":\"{{value_json.mode}}\",";
     payload += "\"qos\":0,";
     payload += "\"optimistic\":false,";
-    payload += "\"options\":[\"LAZY\",\"FUN\",\"WAVES\",\"PROPELLER\",\"ARROW\",\"RIPPLE\",\"GLOBE\",\"BUBBLE\",\"GEAR\",\"SCATTER\",\"CYCLE\"],";
+    payload += "\"options\":[\"LAZY\",\"FUN\",\"WAVES\",\"PROPELLER\",\"ARROW\",\"RIPPLE\",\"GLOBE\",\"BUBBLE\",\"GEAR\",\"SCATTER\",\"DIAGONAL\",\"CYCLE\"],";
     payload += "\"device\":{";
     payload += "\"identifiers\":[\"" + hostname + "\"],";
     payload += "\"name\":\"ClockClock24\",";
@@ -340,6 +345,8 @@ const char *get_mode_string(int mode)
         return "GEAR";
     case SCATTER:
         return "SCATTER";
+    case DIAGONAL:
+        return "DIAGONAL";
     case CYCLE:
         return "CYCLE";
     default:

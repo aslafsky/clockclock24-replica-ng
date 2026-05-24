@@ -78,6 +78,11 @@ void set_gear();
 void set_scatter();
 
 /**
+ * Sets clock time using diagonal animation
+*/
+void set_diagonal();
+
+/**
  * Sets clock time using cycle animation (round-robin through every other
  * animation except LAZY).
 */
@@ -260,6 +265,9 @@ void dispatch_animation(int mode)
       break;
     case SCATTER:
       set_scatter();
+      break;
+    case DIAGONAL:
+      set_diagonal();
       break;
     case CYCLE:
       set_cycle();
@@ -556,6 +564,24 @@ void set_scatter()
     set_half_digit_full(i, hd);
     if (i < 7)
       delay(400);
+  }
+}
+
+void set_diagonal()
+{
+  set_speed(800 * get_speed_multiplier());
+  set_acceleration(150 * get_speed_multiplier());
+  set_direction(MIN_DISTANCE);
+  set_clock(d_diagonal);
+  _delay(4000 + (9000 - 4000) / sqrt(get_speed_multiplier()));
+  set_speed(400 * get_speed_multiplier());
+  set_acceleration(100 * get_speed_multiplier());
+  set_direction(CLOCKWISE2);
+  t_full_clock clock = get_clock_state_from_time(last_hour, last_minute);
+  for (int i = 0; i < 8; i++)
+  {
+    set_half_digit(i, clock.digit[i/2].halfs[i%2]);
+    delay(200 + (400 - 200) / sqrt(get_speed_multiplier()));
   }
 }
 

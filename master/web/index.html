@@ -395,7 +395,7 @@
   let selectedMode = 0
   // Animation mode names. Indices match the firmware's clock_modes enum.
   // CYCLE must stay last; setCycle() uses its index as the cycle range bound.
-  const modes = ["LAZY", "FUN", "WAVES", "PROPELLER", "ARROW", "RIPPLE", "GLOBE", "BUBBLE", "GEAR", "SCATTER", "CYCLE"]
+  const modes = ["LAZY", "FUN", "WAVES", "PROPELLER", "ARROW", "RIPPLE", "GLOBE", "BUBBLE", "GEAR", "SCATTER", "DIAGONAL", "CYCLE"]
   // Current clock enabled state
   let clockEnabled = true
   // Current selected mode
@@ -1133,6 +1133,16 @@
     [225, 225],
     [225, 225],
     [225, 225]
+  ]
+
+  // d_diagonal: digit_diag pose (every sub-clock has hands at 225 / 45 deg)
+  const digit_diag = [
+    [225, 45],
+    [225, 45],
+    [225, 45],
+    [225, 45],
+    [225, 45],
+    [225, 45]
   ]
 
   // d_bubble: digit_bubble pose
@@ -1886,7 +1896,35 @@
       case 7:  setBubble(time);    break;
       case 8:  setGear(time);      break;
       case 9:  setScatter(time);   break;
-      case 10: setCycle(time);     break;
+      case 10: setDiagonal(time);  break;
+      case 11: setCycle(time);     break;
+    }
+  }
+
+  // Sets time with diagonal animation
+  // Phase 1: all clocks move to d_diagonal (MIN_DISTANCE) — every sub-clock
+  //          shows hands at 225 / 45 deg.
+  // Phase 2: after a hold, each half-digit (left to right) is moved to the
+  //          target time with CLOCKWISE2 (one extra full rotation), staggered.
+  function setDiagonal(time) {
+    const scaleFactor = Math.pow(speedMultiplier, 0.7)
+    const diagSecs = 8  / scaleFactor   // Phase 1 travel time
+    const holdMs   = 7000 / scaleFactor // hold before per-half-digit moves
+    const stepSecs = 16 / scaleFactor   // each half-digit's spin duration
+    const stepMs   = 300 / scaleFactor  // gap between successive half-digits
+
+    // Phase 1: move every digit to d_diagonal using MIN_DISTANCE (direction 6)
+    for (let i = 0; i < 4; i++)
+      setDigit(i, digit_diag, 6, diagSecs)
+
+    // Phase 2: per-half-digit move into the target digit using CLOCKWISE2.
+    for (let i = 0; i < 8; i++) {
+      const di   = Math.floor(i / 2)
+      const half = i % 2
+      const values = digits[time.charAt(di)].slice(half * 3, half * 3 + 3)
+      animTimeout(() => {
+        setHalfDigit(i, values, 1, stepSecs)
+      }, holdMs + stepMs * i)
     }
   }
 

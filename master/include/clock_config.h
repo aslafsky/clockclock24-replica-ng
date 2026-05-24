@@ -27,6 +27,7 @@ enum clock_modes
   BUBBLE,
   GEAR,
   SCATTER,
+  DIAGONAL,
   CYCLE
 };
 
