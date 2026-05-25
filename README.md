@@ -4,7 +4,7 @@ Please see my [working ClockClock24 repo](https://github.com/aslafsky/clockclock
 This my modification of [whosmatt's](https://github.com/whosmatt) personal implementation of [Vallasc's](https://github.com/Vallasc) "ClockClock 24" by [Humans Since 1982](https://www.humanssince1982.com/)
 
 This fork is a minor overhaul with some new animations and modes (videos to be added soon):
-- [x] Seven new animation modes added:
+- [x] Eight new animation modes added:
      - [x] Propeller
      - [x] Arrow
      - [x] Ripple
@@ -12,6 +12,7 @@ This fork is a minor overhaul with some new animations and modes (videos to be a
      - [x] Bubble
      - [x] Gear
      - [x] Scatter
+     - [X] Diagonal
 - [x] Cycle mode added to shuffle between animation styles
 
 [whosmatt's](https://github.com/whosmatt) prior additions to this fork are a general overhaul with some new features:
