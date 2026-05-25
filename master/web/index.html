@@ -1951,14 +1951,20 @@
   // Round-robins through every animation in a user-specified order (LAZY
   // is excluded). When a new animation mode is added in the future, append
   // it to cycleOrder below so the cycle picks it up.
+  //
+  // The cycle index is derived from the current wall-clock minute (the
+  // time string passed in), so the web preview always agrees with the
+  // firmware — which runs the same calculation — after a page reload or
+  // firmware reboot.
   const cycleOrder = [
     'FUN', 'GLOBE', 'WAVES', 'ARROW', 'SCATTER',
     'RIPPLE', 'BUBBLE', 'PROPELLER', 'DIAGONAL', 'GEAR',
   ]
   function setCycle(time) {
-    if (typeof setCycle.index === "undefined") setCycle.index = 0
-    const name = cycleOrder[setCycle.index % cycleOrder.length]
-    setCycle.index++
+    const hours = parseInt(time.substring(0, 2), 10)
+    const minutes = parseInt(time.substring(2, 4), 10)
+    const minutesToday = hours * 60 + minutes
+    const name = cycleOrder[minutesToday % cycleOrder.length]
     dispatchAnimation(modes.indexOf(name), time)
   }
 
