@@ -1,8 +1,20 @@
 # clockclock24-replica-ng
-This is the [Vallasc](https://github.com/Vallasc) personal implementation of the "ClockClock 24" by [Humans Since 1982](https://www.humanssince1982.com/), modified my [whosmatt](https://github.com/whosmatt).  
-Refer to the git history for a detailed list of changes.  
+Please see my [working ClockClock24 repo](https://github.com/aslafsky/clockclock24-replica-ng) for my latest updates and the detailed git history. Modified by [aslafsky](https://github.com/aslafsky). This repo was established to reconnect my fork of the ClockClock 24 project back to [Vallasc's](https://github.com/Vallasc) interpretation. 
 
-This fork is a general overhaul with some new features:
+This my modification of [whosmatt's](https://github.com/whosmatt) personal implementation of [Vallasc's](https://github.com/Vallasc) "ClockClock 24" by [Humans Since 1982](https://www.humanssince1982.com/)
+
+This fork is a minor overhaul with some new animations and modes (videos to be added soon):
+- [x] Seven new animation modes added:
+     - [x] Propeller
+     - [x] Arrow
+     - [x] Ripple
+     - [x] Globe
+     - [x] Bubble
+     - [x] Gear
+     - [x] Scatter
+- [x] Cycle mode added to shuffle between animation styles
+
+[whosmatt's](https://github.com/whosmatt) prior additions to this fork are a general overhaul with some new features:
 - [x] MQTT
 - [x] Home Assistant integration and auto-discovery
 - [x] Networking overhaul (Configurable hostname w/ mDNS, captive portal on AP mode, robust management)
