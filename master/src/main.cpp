@@ -590,13 +590,16 @@ void set_cycle()
   // Round-robin through every animation in a user-specified order (LAZY is
   // excluded). When a new animation mode is added in the future, append it
   // to this list so the cycle picks it up.
+  //
+  // The cycle index is derived from the current wall-clock minute, not a
+  // private counter, so the web preview (which runs the same calculation)
+  // always agrees with the firmware after a reboot or page reload.
   static const int cycle_order[] = {
     FUN, GLOBE, WAVES, ARROW, SCATTER, RIPPLE, BUBBLE, PROPELLER, DIAGONAL, GEAR
   };
   static const int cycle_count = sizeof(cycle_order) / sizeof(cycle_order[0]);
-  static int cycle_index = 0;
-  int mode = cycle_order[cycle_index % cycle_count];
-  cycle_index++;
+  int minutes_today = last_hour * 60 + last_minute;
+  int mode = cycle_order[minutes_today % cycle_count];
   dispatch_animation(mode);
 }
 
