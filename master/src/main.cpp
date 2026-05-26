@@ -379,7 +379,7 @@ void set_arrow()
 
 void set_ripple()
 {
-  set_speed(800 * get_speed_multiplier());
+  set_speed(700 * get_speed_multiplier());
   set_acceleration(150 * get_speed_multiplier());
   set_direction(MIN_DISTANCE);
   set_clock(d_WAVE);
@@ -410,7 +410,7 @@ void set_ripple()
       }
     }
     if (d < MAX_DIST)
-      delay(400);
+      delay(325);
   }
 }
 
@@ -534,7 +534,7 @@ void set_gear()
       }
     }
     if (g < MAX_GROUP)
-      delay(500);
+      delay(400);
   }
 }
 
