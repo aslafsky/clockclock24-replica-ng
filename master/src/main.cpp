@@ -311,8 +311,8 @@ void set_waves()
 
 void set_propeller()
 {
-  set_speed(400 * get_speed_multiplier());
-  set_acceleration(125 * get_speed_multiplier());
+  set_speed(450 * get_speed_multiplier());
+  set_acceleration(150 * get_speed_multiplier());
   // Use CLOCKWISE3 to populate speed/accel fields via get_full_half_digit
   set_direction(CLOCKWISE3);
   t_full_clock clock = get_clock_state_from_time(last_hour, last_minute);
@@ -379,7 +379,7 @@ void set_arrow()
 
 void set_ripple()
 {
-  set_speed(700 * get_speed_multiplier());
+  set_speed(600 * get_speed_multiplier());
   set_acceleration(150 * get_speed_multiplier());
   set_direction(MIN_DISTANCE);
   set_clock(d_WAVE);
@@ -534,7 +534,7 @@ void set_gear()
       }
     }
     if (g < MAX_GROUP)
-      delay(400);
+      delay(300);
   }
 }
 
