@@ -83,6 +83,11 @@ void set_scatter();
 void set_diagonal();
 
 /**
+ * Sets clock time using cascade animation
+*/
+void set_cascade();
+
+/**
  * Sets clock time using cycle animation (round-robin through every other
  * animation except LAZY).
 */
@@ -268,6 +273,9 @@ void dispatch_animation(int mode)
       break;
     case DIAGONAL:
       set_diagonal();
+      break;
+    case CASCADE:
+      set_cascade();
       break;
     case CYCLE:
       set_cycle();
@@ -585,6 +593,41 @@ void set_diagonal()
   }
 }
 
+void set_cascade()
+{
+  // Phase 1: move every clock to d_stop (hands pointing down) and hold.
+  set_speed(800 * get_speed_multiplier());
+  set_acceleration(150 * get_speed_multiplier());
+  set_direction(MIN_DISTANCE);
+  set_clock(d_stop);
+  _delay(4000 + (9000 - 4000) / sqrt(get_speed_multiplier()));
+
+  // Phase 2: column-by-column reveal of the time, both hands CCW. The
+  // hour hand makes 1 extra full rotation (COUNTERCLOCKWISE2); the minute
+  // hand makes 2 extra full rotations (COUNTERCLOCKWISE3) at double the
+  // hour hand's speed so both hands finish together.
+  set_speed(300 * get_speed_multiplier());
+  set_acceleration(150);
+  set_direction(COUNTERCLOCKWISE3);
+
+  t_full_clock clock = get_clock_state_from_time(last_hour, last_minute);
+
+  // Left-to-right stagger: column 0 starts first, column 7 last.
+  for (int i = 0; i < 8; i++)
+  {
+    t_half_digit hd = get_full_half_digit(clock.digit[i/2].halfs[i%2]);
+    for (int j = 0; j < 3; j++)
+    {
+      hd.clocks[j].mode_h = COUNTERCLOCKWISE2; // 1 extra full rotation
+      hd.clocks[j].mode_m = COUNTERCLOCKWISE3; // 2 extra full rotations
+      hd.clocks[j].speed_m = 600 * get_speed_multiplier();
+    }
+    set_half_digit_full(i, hd);
+    if (i < 7)
+      delay(400);
+  }
+}
+
 void set_cycle()
 {
   // Round-robin through every animation in a user-specified order (LAZY is
@@ -595,7 +638,7 @@ void set_cycle()
   // private counter, so the web preview (which runs the same calculation)
   // always agrees with the firmware after a reboot or page reload.
   static const int cycle_order[] = {
-    FUN, GLOBE, WAVES, ARROW, SCATTER, RIPPLE, BUBBLE, PROPELLER, DIAGONAL, GEAR
+    FUN, GLOBE, WAVES, ARROW, SCATTER, RIPPLE, BUBBLE, PROPELLER, DIAGONAL, GEAR, CASCADE
   };
   static const int cycle_count = sizeof(cycle_order) / sizeof(cycle_order[0]);
   int minutes_today = last_hour * 60 + last_minute;

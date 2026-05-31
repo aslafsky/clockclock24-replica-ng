@@ -395,7 +395,7 @@
   let selectedMode = 0
   // Animation mode names. Indices match the firmware's clock_modes enum.
   // CYCLE must stay last; setCycle() uses its index as the cycle range bound.
-  const modes = ["LAZY", "FUN", "WAVES", "PROPELLER", "ARROW", "RIPPLE", "GLOBE", "BUBBLE", "GEAR", "SCATTER", "DIAGONAL", "CYCLE"]
+  const modes = ["LAZY", "FUN", "WAVES", "PROPELLER", "ARROW", "RIPPLE", "GLOBE", "BUBBLE", "GEAR", "SCATTER", "DIAGONAL", "CASCADE", "CYCLE"]
   // Current clock enabled state
   let clockEnabled = true
   // Current selected mode
@@ -1897,7 +1897,8 @@
       case 8:  setGear(time);      break;
       case 9:  setScatter(time);   break;
       case 10: setDiagonal(time);  break;
-      case 11: setCycle(time);     break;
+      case 11: setCascade(time);   break;
+      case 12: setCycle(time);     break;
     }
   }
 
@@ -1948,6 +1949,52 @@
     }
   }
 
+  // Sets time with cascade animation
+  // Phase 1: every sub-clock moves to the d_stop pose (hands point down).
+  // Phase 2: column by column (left to right, 400ms apart), both hands
+  //          spin counter-clockwise into the target time. The hour hand
+  //          makes 1 extra full rotation; the minute hand makes 2 extra
+  //          full rotations at twice the hour hand's speed so both hands
+  //          finish together.
+  function setCascade(time) {
+    const scaleFactor = Math.pow(speedMultiplier, 0.7)
+    const phase1Secs = 8 / scaleFactor   // Phase 1 travel to stop pose
+    const holdMs     = 7000 / scaleFactor // hold before per-column spins
+    const colStepMs  = 400 / scaleFactor  // gap between columns
+    const hourSpeed   = 45 * scaleFactor  // deg per sec (matches firmware ratio)
+    const minuteSpeed = 90 * scaleFactor  // 2x hour -> finishes alongside
+
+    // Phase 1: move every digit to d_stop using MIN_DISTANCE (direction 6)
+    for (let i = 0; i < 4; i++)
+      setDigit(i, digit_stop, 6, phase1Secs)
+
+    // Phase 2: per-column staggered CCW spin into the target time.
+    for (let hd = 0; hd < 8; hd++) {
+      const di   = Math.floor(hd / 2)
+      const half = hd % 2
+      const values = digits[time.charAt(di)].slice(half * 3, half * 3 + 3)
+      animTimeout(() => {
+        for (let p = 0; p < 3; p++) {
+          const curr = current_state[di][p + half * 3]
+          const anim = anim_state[di][p + half * 3]
+          // Both hands CCW. Same formula -> same direction; minute hand
+          // does 2x the rotations at 2x the speed = same wall time.
+          const d1 = calcAngleCW(curr[0], values[p][0])
+          curr[0] = (curr[0] + d1) % 360
+          const dh = d1 + 360 // hour: 1 extra full CCW rotation
+          const d3 = calcAngleCW(curr[1], values[p][1])
+          curr[1] = (curr[1] + d3) % 360
+          const dm = d3 + 720 // minute: 2 extra full CCW rotations
+          anim[0] -= dh
+          anim[1] -= dm
+          const secH = dh / hourSpeed
+          const secM = dm / minuteSpeed
+          setHands(hd * 3 + p, anim[0], anim[1], secH, secM, 'linear')
+        }
+      }, holdMs + colStepMs * hd)
+    }
+  }
+
   // Round-robins through every animation in a user-specified order (LAZY
   // is excluded). When a new animation mode is added in the future, append
   // it to cycleOrder below so the cycle picks it up.
@@ -1959,6 +2006,7 @@
   const cycleOrder = [
     'FUN', 'GLOBE', 'WAVES', 'ARROW', 'SCATTER',
     'RIPPLE', 'BUBBLE', 'PROPELLER', 'DIAGONAL', 'GEAR',
+    'CASCADE',
   ]
   function setCycle(time) {
     const hours = parseInt(time.substring(0, 2), 10)

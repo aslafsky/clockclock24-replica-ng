@@ -28,6 +28,7 @@ enum clock_modes
   GEAR,
   SCATTER,
   DIAGONAL,
+  CASCADE,
   CYCLE
 };
 
