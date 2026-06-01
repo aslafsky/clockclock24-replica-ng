@@ -481,10 +481,15 @@
 
   // Called on buttons clicks to select the mode
   function selectMode(mode) {
-    if(selectedMode !== undefined)
-      document.getElementById("mode-" + selectedMode).classList.remove("active")
+    // The previously selected button may not exist (e.g. a stale/out-of-range
+    // mode persisted by the firmware), so guard against a missing element.
+    if(selectedMode !== undefined) {
+      const prev = document.getElementById("mode-" + selectedMode)
+      if(prev) prev.classList.remove("active")
+    }
     selectedMode = mode
-    document.getElementById("mode-" + selectedMode).classList.add("active")
+    const curr = document.getElementById("mode-" + selectedMode)
+    if(curr) curr.classList.add("active")
     saveMode(selectedMode, clockEnabled)
   }
 
@@ -601,8 +606,12 @@
     sleep = res.sleep_time
     if(selectedDay !== undefined)
       genHours(selectedDay)
-    // Update clock mode and enabled state
+    // Update clock mode and enabled state. Clamp a stale/out-of-range value
+    // (e.g. a mode persisted before an animation was removed) so the UI always
+    // has a valid, selectable button highlighted.
     selectedMode = res.clock_mode
+    if(selectedMode < 0 || selectedMode >= modes.length)
+      selectedMode = 0
     clockEnabled = res.clock_enabled !== undefined ? res.clock_enabled : true
     genModes()
     if (!clockEnabled) {
