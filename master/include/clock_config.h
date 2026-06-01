@@ -23,7 +23,6 @@ enum clock_modes
   PROPELLER,
   ARROW,
   RIPPLE,
-  GLOBE,
   BUBBLE,
   GEAR,
   SCATTER,
