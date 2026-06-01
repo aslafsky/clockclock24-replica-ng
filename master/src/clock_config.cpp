@@ -31,6 +31,11 @@ void begin_config()
 {
   prefs.begin("clockclock24");
   _clock_mode = prefs.getInt("clock_mode", LAZY);
+  // Guard against a persisted mode that is no longer valid (e.g. after an
+  // animation mode is removed and the enum range shrinks). Fall back to LAZY
+  // so dispatch_animation() always has a valid case and the clock turns on.
+  if (_clock_mode < LAZY || _clock_mode > CYCLE)
+    _clock_mode = LAZY;
   _clock_enabled = prefs.getBool("clock_enabled", true);
   _wireless_mode = prefs.getInt("wireless_mode", HOTSPOT);
   _active_wireless_mode = _wireless_mode;
