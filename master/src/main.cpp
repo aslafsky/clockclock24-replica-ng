@@ -58,11 +58,6 @@ void set_arrow();
 void set_ripple();
 
 /**
- * Sets clock time using globe animation
-*/
-void set_globe();
-
-/**
  * Sets clock time using bubble animation
 */
 void set_bubble();
@@ -259,9 +254,6 @@ void dispatch_animation(int mode)
     case RIPPLE:
       set_ripple();
       break;
-    case GLOBE:
-      set_globe();
-      break;
     case BUBBLE:
       set_bubble();
       break;
@@ -419,46 +411,6 @@ void set_ripple()
     }
     if (d < MAX_DIST)
       delay(250);
-  }
-}
-
-void set_globe()
-{
-  set_speed(800 * get_speed_multiplier());
-  set_acceleration(150 * get_speed_multiplier());
-  set_direction(MIN_DISTANCE);
-  set_clock(d_globe);
-  _delay(4000 +(9000 - 4000) / sqrt(get_speed_multiplier()));
-  set_speed(500 * get_speed_multiplier());
-  set_acceleration(150 * get_speed_multiplier());
-  // Use CLOCKWISE3 to populate speed/accel fields via get_full_half_digit
-  set_direction(CLOCKWISE3);
-  t_full_clock clock = get_clock_state_from_time(last_hour, last_minute);
-  for (int i = 0; i < 8; i++)
-  {
-    t_half_digit hd = get_full_half_digit(clock.digit[i/2].halfs[i%2]);
-    for (int j = 0; j < 3; j++)
-    {
-      // Checkerboard spin: (col + row) even -> hour CW / minute CCW;
-      // (col + row) odd -> hour CCW / minute CW. Sub-clocks in the inner
-      // four columns (2, 3, 4, 5) have their hour and minute hand rotation
-      // direction inverted; the outer columns keep the checkerboard
-      // direction.
-      bool hour_cw = ((i + j) % 2 == 0);
-      if (i >= 2 && i <= 5)
-        hour_cw = !hour_cw;
-      if (hour_cw)
-      {
-        hd.clocks[j].mode_h = CLOCKWISE3;
-        hd.clocks[j].mode_m = COUNTERCLOCKWISE3;
-      }
-      else
-      {
-        hd.clocks[j].mode_h = COUNTERCLOCKWISE3;
-        hd.clocks[j].mode_m = CLOCKWISE3;
-      }
-    }
-    set_half_digit_full(i, hd);
   }
 }
 
@@ -638,7 +590,7 @@ void set_cycle()
   // private counter, so the web preview (which runs the same calculation)
   // always agrees with the firmware after a reboot or page reload.
   static const int cycle_order[] = {
-    FUN, GLOBE, WAVES, ARROW, SCATTER, RIPPLE, BUBBLE, PROPELLER, DIAGONAL, GEAR, CASCADE
+    FUN, WAVES, ARROW, SCATTER, RIPPLE, BUBBLE, PROPELLER, DIAGONAL, GEAR, CASCADE
   };
   static const int cycle_count = sizeof(cycle_order) / sizeof(cycle_order[0]);
   int minutes_today = last_hour * 60 + last_minute;
