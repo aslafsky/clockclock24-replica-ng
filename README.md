@@ -8,7 +8,7 @@ This fork is a minor overhaul with some new animations and modes (videos to be a
      - [x] Propeller
      - [x] Arrow
      - [x] Ripple
-     - [x] Globe
+     - [x] Cascade
      - [x] Bubble
      - [x] Gear
      - [x] Scatter
@@ -190,7 +190,7 @@ Since I don't want to receive a letter from Humans Since 1982’s lawyers, all d
 | Propeller | ![sasdasd](/images/Propeller.gif) |
 | Arrow | ![sasdasd](/images/Arrow.gif) |
 | Ripple | ![sasdasd](/images/Ripple.gif) |
-| Globe | ![sasdasd](/images/Globe.gif) |
+| Cascade | ![sasdasd](/images/Cascade.gif) |
 | Bubble | ![sasdasd](/images/Bubble.gif) |
 | Gear | ![sasdasd](/images/Gear.gif) |
 | Scatter | ![sasdasd](/images/Scatter.gif) |
