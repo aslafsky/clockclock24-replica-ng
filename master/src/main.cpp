@@ -384,7 +384,7 @@ void set_ripple()
   set_direction(MIN_DISTANCE);
   set_clock(d_WAVE);
   _delay(5000 +(9000 - 4000) / sqrt(get_speed_multiplier()));
-  set_speed(500 * get_speed_multiplier());
+  set_speed(600 * get_speed_multiplier());
   set_acceleration(150 * get_speed_multiplier());
   set_direction(CLOCKWISE3);
 
