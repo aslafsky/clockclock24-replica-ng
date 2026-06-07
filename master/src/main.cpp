@@ -421,7 +421,7 @@ void set_bubble()
   set_direction(MIN_DISTANCE);
   set_clock(d_bubble);
   _delay(4000 +(9000 - 4000) / sqrt(get_speed_multiplier()));
-  set_speed(600 * get_speed_multiplier());
+  set_speed(500 * get_speed_multiplier());
   set_acceleration(150 * get_speed_multiplier());
   // Use CLOCKWISE3 to populate speed/accel fields via get_full_half_digit
   set_direction(CLOCKWISE3);
