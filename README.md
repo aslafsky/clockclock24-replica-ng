@@ -177,22 +177,29 @@ The case is one piece, it was made by taking a sheet of black MDF and hollowing 
 Since I don't want to receive a letter from Humans Since 1982’s lawyers, all design files and the actual clock assembly are omitted, more [here](https://hackaday.com/2020/07/31/patent-law-and-the-legality-of-making-something-similar/).
 > “Humans Since 1982 have the copyright to works displaying digital time using a grid arrangement of analog clocks…”
 
+
 ---
 
 ## Final result
-<div align="center">
 
-| Animation type | Result |
-| - | - |
-| Lazy | ![sasdasd](/images/clock1.gif) |
-| Fun | ![sasdasd](/images/Fun.gif) |
-| Waves | ![sasdasd](/images/Wave.gif) |
-| Propeller | ![sasdasd](/images/Propeller.gif) |
-| Arrow | ![sasdasd](/images/Arrow.gif) |
-| Ripple | ![sasdasd](/images/Ripple.gif) |
-| Cascade | ![sasdasd](/images/Cascade.gif) |
-| Bubble | ![sasdasd](/images/Bubble.gif) |
-| Gear | ![sasdasd](/images/Gear.gif) |
-| Scatter | ![sasdasd](/images/Scatter.gif) |
-| Diagonal | ![sasdasd](/images/Diagonal.gif) |
+https://github.com/user-attachments/assets/835c4c44-37d9-4a8c-a408-af7cc6b6dde9
+
+https://github.com/user-attachments/assets/8d97395e-3f8a-4908-9ca9-3928f3e401f4
+
+https://github.com/user-attachments/assets/415a5962-876f-4a4a-8052-c9f70c5bdd86
+
+https://github.com/user-attachments/assets/9a533dc3-90f7-4714-8447-f53f5829d13a
+
+https://github.com/user-attachments/assets/2a0b5116-f189-4ec1-8f51-67dc6aa55ac6
+
+https://github.com/user-attachments/assets/7974be6f-8652-4e31-8951-664f4913cd32
+
+https://github.com/user-attachments/assets/7365eb22-cd8b-4a90-aeb5-516aea6f77fc
+
+https://github.com/user-attachments/assets/922780c6-5505-44c5-a986-f7b5de932492
+
+https://github.com/user-attachments/assets/6f617b33-34e5-42cb-8144-677705e4139c
+
+https://github.com/user-attachments/assets/c1bce12e-06a4-454c-a5af-70ea19aa544e
+
 </div>
